@@ -30,8 +30,8 @@
 
 ## 推荐阅读顺序
 
-1. [00-learning-roadmap.md](docs/qe/00-learning-roadmap.md)：先建立 1 周、2-4 周、1-2 个月的学习路线。
-2. [01-qe-ecosystem.md](docs/qe/01-qe-ecosystem.md)：理解 QE 原生模块和外部工具在 workflow 中的位置。
+1. [00-learning-roadmap.md](docs/00-learning-roadmap.md)：先建立 1 周、2-4 周、1-2 个月的学习路线。
+2. [01-qe-ecosystem.md](docs/01-qe-ecosystem.md)：理解 QE 原生模块和外部工具在 workflow 中的位置。
 3. `02-theory-minimum/`：只补“会影响 input/output 判断”的最低理论。
 4. `03-core-input-structure/`：系统读懂 `pw.x` 输入文件。
 5. `04-workflows/`：按 SCF、收敛性、relax、bands、DOS、phonon 等真实计算链学习。
@@ -42,18 +42,17 @@
 
 ```text
 docs/
-  qe/
-    README.md
-    00-learning-roadmap.md
-    01-qe-ecosystem.md
-    02-theory-minimum/
-    03-core-input-structure/
-    04-workflows/
-    05-postprocessing/
-    06-convergence-and-debugging/
-    07-hpc-and-reproducibility/
-    08-tools-and-ecosystem/
-    09-templates-and-checklists/
+  README.md
+  00-learning-roadmap.md
+  01-qe-ecosystem.md
+  02-theory-minimum/
+  03-core-input-structure/
+  04-workflows/
+  05-postprocessing/
+  06-convergence-and-debugging/
+  07-hpc-and-reproducibility/
+  08-tools-and-ecosystem/
+  09-templates-and-checklists/
 ```
 
 ## 当前资料基础
@@ -80,4 +79,3 @@ docs/
 - 不把 phonon 当作普通后处理；它是 DFPT workflow，对 SCF、结构和收敛性更敏感。
 - 每个 workflow 必须写清楚输入前提、中间文件、输出判断和下游依赖。
 - 每次真实计算都应留下 calculation record，包括结构来源、赝势来源、命令、环境、输出摘要、收敛状态和下一步。
-
