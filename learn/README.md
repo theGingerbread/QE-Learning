@@ -55,3 +55,7 @@
 - 先证据后结论：先读 input/output、参数记录和 warning，再写可靠性判断。
 - 先最小闭环后复杂组合：每个阶段先完成一个能被复查的最小 workflow，再增加参数或功能。
 - 先记录来源后沉淀经验：参数定义、模板和教程经验需要能追踪到公开来源；个人判断要标明依据和版本边界。
+
+## 进一步理论学习
+
+完成基础 workflow 后，如果需要解释 band gap、磁性、SOC、DFT+U、vdW、phonon 虚频、work function、EPC 或 excited-state 边界，请进入 [physics-judgement/](../physics-judgement/)。该目录不替代 workflow 页面，而是帮助把 output 中的异常、近似来源和物理失败模式转化为更可靠的 PASS / WARN / BLOCK 判断。

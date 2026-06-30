@@ -23,6 +23,10 @@
 - 常见错误：典型误读、参数不一致、数值未收敛或文件依赖错误。
 - 对应 workflow：应回链到 `workflows/` 中使用该理论判断的计算步骤。
 
+## 与 physics-judgement/ 的关系
+
+本目录回答“正确使用 QE 的最低理论”；[physics-judgement/](../physics-judgement/) 回答“如何形成更可靠的 DFT 物理判断”。如果问题已经超出参数含义和最低 output review，例如 band gap 的物理解释、DFT+U 的模型边界、SOC/vdW 是否改变结论、phonon 虚频是否代表真实不稳定，应回到 `physics-judgement/` 进一步审阅。
+
 ## 页面列表
 
 - [DFT, Kohn-Sham and SCF](dft-ks-scf.md)
