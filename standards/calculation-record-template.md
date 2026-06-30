@@ -82,6 +82,19 @@ pw.x -in pw.scf.<system>.in > pw.scf.<system>.out
 - Stress:
 - Warnings:
 
+## Review status
+
+- Status: PASS / WARN / BLOCK
+- Reason:
+- Evidence:
+  - Output file:
+  - Key output lines:
+  - Convergence evidence:
+  - Warning review:
+- Downstream allowed:
+- Downstream blocked:
+- Uncertainty statement:
+
 ## Convergence status
 
 - SCF convergence: PASS / WARN / BLOCK
@@ -127,3 +140,11 @@ pw.x -in pw.scf.<system>.in > pw.scf.<system>.out
 - `PASS`：程序完成，关键输出达到阈值，参数收敛证据足以支持下游。
 - `WARN`：程序完成，但存在需要标注的数值或物理风险；可以用于探索，不应作为最终结论。
 - `BLOCK`：不能进入下游 workflow；需要重算、修复结构、换赝势或重新设计参数。
+
+`Convergence status` 是 `Review status` 的证据来源之一，不应替代最终状态。最终记录必须包含 `Status`、`Reason`、`Evidence`、`Downstream allowed` 和 `Uncertainty statement`。
+
+## 资料来源
+
+- [pass-warn-block.md](pass-warn-block.md)
+- [output-review-checklist.md](output-review-checklist.md)
+- [citation-and-source-policy.md](citation-and-source-policy.md)

@@ -87,3 +87,9 @@ calculations/
 - 探索性计算用独立 `prefix/outdir`。
 - 生产计算不要复用旧 scratch，除非明确是 restart。
 - 下游 workflow 的 `record.md` 必须写清楚读取的是哪个 SCF 的 `prefix/outdir`。
+
+## 资料来源
+
+- [calculation-record-template.md](calculation-record-template.md)
+- [project-layout.md](project-layout.md)
+- [QE INPUT_PW](https://www.quantum-espresso.org/Doc/INPUT_PW.html)
