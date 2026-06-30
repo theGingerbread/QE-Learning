@@ -52,7 +52,7 @@
 
 ## 8. 应回写到哪些 theory-minimum 页面？
 
-- [theory-minimum/finite-size-and-boundary-conditions.md](../theory-minimum/README.md)
+- [theory-minimum/functional-choice.md](../theory-minimum/functional-choice.md)
 - [theory-minimum/force-stress-relaxation.md](../theory-minimum/force-stress-relaxation.md)
 
 
@@ -72,9 +72,8 @@
 
 ## 9. 资料来源
 
-- Hohenberg and Kohn, *Inhomogeneous Electron Gas*：ground-state DFT 边界。
-- Kohn and Sham, *Self-Consistent Equations Including Exchange and Correlation Effects*：KS 辅助体系。
-- Quantum ESPRESSO official documentation and `INPUT_*` references：QE 字段和程序行为核验。
-- Giannozzi et al., Quantum ESPRESSO code papers：QE 方法和模块边界。
+- [QE INPUT_PW](https://www.quantum-espresso.org/Doc/INPUT_PW.html)：`vdw_corr`、低维边界和电场/偶极相关字段需按官方文档核验。
+- [workflows/advanced/vdW-corrections.md](../workflows/advanced/vdW-corrections.md)：本仓库 vdW workflow 边界。
+- [physics-judgement/11-surfaces-interfaces-and-electrostatics.md](11-surfaces-interfaces-and-electrostatics.md)：低维、表面和电势平台判断。
 - [references/canonical-literature.md](../references/canonical-literature.md)：本仓库 canonical literature 分级。
 - [references/source-index.md](../references/source-index.md)：公开来源入口。

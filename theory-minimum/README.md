@@ -31,6 +31,7 @@
 
 - [DFT, Kohn-Sham and SCF](dft-ks-scf.md)
 - [Plane-wave cutoff](plane-wave-cutoff.md)
+- [Exchange-correlation functional choice](functional-choice.md)
 - [Pseudopotentials](pseudopotentials.md)
 - [K-points, symmetry and k-path](kpoints-symmetry-kpath.md)
 - [Smearing and metals](smearing-metals.md)
