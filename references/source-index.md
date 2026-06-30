@@ -21,7 +21,7 @@
 - [Pranab Das QE tutorial](https://pranabdas.github.io/espresso/)
 - [Pranab Das SCF tutorial](https://pranabdas.github.io/espresso/hands-on/scf)
 - [Pranab Das phonon tutorial](https://pranabdas.github.io/espresso/hands-on/phonon/)
-- [Pranab Das GaAs phonon repository directory](https://github.com/pranabdas/espresso/tree/master/src/GaAs-phonon)
+- [Pranab Das QE GitHub repository](https://github.com/pranabdas/espresso)
 - [Kyoto University QE phonon calculation DokuWiki](https://www2.yukawa.kyoto-u.ac.jp/~koudai.sugimoto/dokuwiki/doku.php?id=quantumespresso%3Aphonon%3A%E3%83%95%E3%82%A9%E3%83%8E%E3%83%B3%E3%81%AE%E8%A8%88%E7%AE%97)
 - [Kyoto University QE phonon DOS and dispersion DokuWiki](https://www2.yukawa.kyoto-u.ac.jp/~koudai.sugimoto/dokuwiki/doku.php?id=quantumespresso%3A%E3%83%95%E3%82%A9%E3%83%8E%E3%83%B3%E3%81%AE%E7%8A%B6%E6%85%8B%E5%AF%86%E5%BA%A6%E3%81%A8%E5%88%86%E6%95%A3)
 - [Materials Cloud Quantum ESPRESSO school 2023](https://github.com/materialscloud-org/QuantumESPRESSO-school-2023)

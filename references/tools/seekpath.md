@@ -14,7 +14,7 @@ SeeK-path 是用于晶体结构标准化和高对称 k-path 生成的工具。
 
 ## 4. 哪些部分适合跟做？
 
-用 Si/GaAs 结构生成 primitive cell 与 high-symmetry path，并和 QE `K_POINTS crystal_b` 对照。
+用一个已检查过的 `<structure>` 生成 primitive cell 与 high-symmetry path，并和 QE `K_POINTS crystal_b` 对照。
 
 ## 5. 哪些部分只适合作为参考？
 

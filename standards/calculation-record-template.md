@@ -1,6 +1,6 @@
 # Calculation Record Template
 
-每次 QE 计算都应保留一份 `record.md`。它的作用不是重复 input 文件，而是记录科学上下文、执行环境、输出判断和下一步决策。
+该模板用于个人学习和科研计算记录。它不要求本仓库保存具体 input/output 文件，而是规定每次 QE 计算应记录哪些上下文、参数、输出判断和下游决策。
 
 ````markdown
 # Calculation Record

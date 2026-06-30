@@ -3,71 +3,75 @@
 ## 页面定位
 
 - 对应学习路线：[learn/05-electronic-structure-loop.md](../../learn/05-electronic-structure-loop.md)
-- 结构学习边界：k-path 依赖结构标准化；结构操作学习将作为独立项目展开，本页只说明 QE 对 k-path 输入的要求。
+- 结构输入边界：k-path 依赖结构标准化；本页只说明 QE 对 k-path 输入的要求。
 - 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
-## 1. 计算目标
+## 计算目标
 
-Bands workflow 的目标是沿 Brillouin zone 中高对称路径计算 Kohn-Sham eigenvalues，并生成可解释的能带图。它用于判断带隙、直接/间接跃迁、能带交叉、简并、SOC/磁性/DFT+U 等对电子结构的影响。
+Bands workflow 沿 Brillouin zone 高对称路径计算 Kohn-Sham eigenvalues，用于判断带隙、直接/间接跃迁、能带交叉、简并，以及 SOC、磁性、DFT+U 等设置对电子结构的影响。
 
-Bands 不是 DOS 的替代品。Bands 使用路径采样，DOS 通常需要均匀且更密的 k 网格。
+Bands 使用路径采样；DOS/PDOS 通常使用均匀且更密的 k 网格。两类 workflow 的输入和输出判断不能互相替代。
 
-## 2. 输入前提
+## 输入前提
 
-- 结构已经 relax 或来自可信实验结构。
-- 已完成并验证 SCF。
-- cutoff、k 点和 smearing 策略已有基本收敛证据。
-- 已确定使用 primitive cell 还是 conventional cell。
-- 已生成或手工确认高对称 k-path。
+- `<structure>` 已经优化或来自可信结构来源。
+- 已完成并审阅 SCF，`prefix/outdir` 可被 bands 计算读取。
+- cutoff、SCF k 点和 occupation/smearing 策略已有基本收敛证据。
+- 已明确 primitive cell / conventional cell 的选择。
+- 已生成或人工确认 `<k_path>`，并记录路径来源和坐标基底。
 
-## 3. 计算图
+## 计算图
 
 ```text
-structure + pseudopotential
-  -> pw.x scf on uniform k-mesh
+<structure> + <pseudo>
+  -> pw.x scf on <uniform_k_mesh>
   -> k-path generation / validation
-  -> pw.x bands calculation on high-symmetry path
+  -> pw.x bands on <k_path>
   -> bands.x
-  -> plot data / band figure / interpretation
+  -> band data / figure / interpretation
 ```
 
-## 4. 需要的 QE 程序
+## 需要的 QE 程序
 
 - `pw.x`：先跑 `calculation='scf'`，再跑 `calculation='bands'`。
-- `bands.x`：整理 bands 计算结果，输出绘图文件。
-- 可选：SeeK-path、Python/matplotlib。
+- `bands.x`：整理 bands 计算结果，输出绘图数据。
+- 可选辅助：SeeK-path、spglib、Python/matplotlib。
 
-## 5. 输入文件模板
+## 通用输入模板
 
 SCF：
 
 ```fortran
 &CONTROL
   calculation = 'scf',
-  prefix = 'si',
-  outdir = './out',
-  pseudo_dir = './pseudo',
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  pseudo_dir = '<pseudo_dir>',
 /
 &SYSTEM
   ibrav = 0,
-  nat = 2,
-  ntyp = 1,
-  ecutwfc = 40,
-  ecutrho = 320,
-  occupations = 'fixed',
+  nat = <number_of_atoms>,
+  ntyp = <number_of_species>,
+  ecutwfc = <wavefunction_cutoff>,
+  ecutrho = <charge_density_cutoff>,
+  occupations = '<occupation_scheme>',
 /
 &ELECTRONS
-  conv_thr = 1.0d-8,
+  conv_thr = <scf_threshold>,
 /
 ATOMIC_SPECIES
-  Si 28.0855 Si.upf
-ATOMIC_POSITIONS crystal
-  Si 0.000000 0.000000 0.000000
-  Si 0.250000 0.250000 0.250000
+  <Element> <Mass> <Pseudo.UPF>
+
+ATOMIC_POSITIONS <coordinate_type>
+  <Element> <x> <y> <z>
+
 K_POINTS automatic
-  8 8 8 0 0 0
-CELL_PARAMETERS angstrom
-  ...
+  <nk1> <nk2> <nk3> <sk1> <sk2> <sk3>
+
+CELL_PARAMETERS <unit>
+  <a1x> <a1y> <a1z>
+  <a2x> <a2y> <a2z>
+  <a3x> <a3y> <a3z>
 ```
 
 Bands：
@@ -75,114 +79,111 @@ Bands：
 ```fortran
 &CONTROL
   calculation = 'bands',
-  prefix = 'si',
-  outdir = './out',
-  pseudo_dir = './pseudo',
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  pseudo_dir = '<pseudo_dir>',
 /
 &SYSTEM
   ibrav = 0,
-  nat = 2,
-  ntyp = 1,
-  ecutwfc = 40,
-  ecutrho = 320,
-  nbnd = 12,
-  occupations = 'fixed',
+  nat = <number_of_atoms>,
+  ntyp = <number_of_species>,
+  ecutwfc = <wavefunction_cutoff>,
+  ecutrho = <charge_density_cutoff>,
+  nbnd = <number_of_bands>,
+  occupations = '<occupation_scheme>',
 /
 &ELECTRONS
-  conv_thr = 1.0d-8,
+  conv_thr = <scf_threshold>,
 /
 ATOMIC_SPECIES
-  Si 28.0855 Si.upf
-ATOMIC_POSITIONS crystal
-  ...
+  <Element> <Mass> <Pseudo.UPF>
+
+ATOMIC_POSITIONS <coordinate_type>
+  <Element> <x> <y> <z>
+
 K_POINTS crystal_b
-  4
-  0.0000 0.0000 0.0000 30 ! Gamma
-  0.5000 0.0000 0.5000 30 ! X
-  0.5000 0.2500 0.7500 30 ! W
-  0.3750 0.3750 0.7500 1  ! K
-CELL_PARAMETERS angstrom
-  ...
+  <number_of_path_points>
+  <kx_1> <ky_1> <kz_1> <npoints_to_next> ! <label_1>
+  <kx_2> <ky_2> <kz_2> <npoints_to_next> ! <label_2>
+
+CELL_PARAMETERS <unit>
+  <a1x> <a1y> <a1z>
+  <a2x> <a2y> <a2z>
+  <a3x> <a3y> <a3z>
 ```
 
 `bands.x`：
 
 ```fortran
 &BANDS
-  prefix = 'si',
-  outdir = './out',
-  filband = 'bands.si.dat',
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  filband = 'bands.<system>.dat',
 /
 ```
 
-## 6. 关键参数解释
+## 输入字段说明
 
-| 参数 | 作用 | 错误用法 | 输出中如何验证 |
+| 字段 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|
 | `calculation='bands'` | 沿给定 k-path 计算 eigenvalues | 用它替代 SCF | bands run 会读取已有 SCF 数据 |
-| `prefix/outdir` | 连接 SCF 与 bands | 与 SCF 不一致 | 报找不到 charge density 或使用旧数据 |
-| `nbnd` | 计算能带数量 | 导带不够，图像截断 | output 中有 number of Kohn-Sham states |
-| `K_POINTS crystal_b` | 以路径段形式给高对称点 | 用 automatic mesh 画 bands | output k 点序列应对应路径 |
-| `nosym` | 某些非标准路径/低维/磁性场景可能需要 | 无脑关闭或无脑开启 | 检查对称性和 k 点是否被改写 |
+| `prefix/outdir` | 连接 SCF 与 bands | 与 SCF 不一致 | 报找不到 charge density 或读取旧数据 |
+| `nbnd` | 控制输出能带数量 | 导带数量不够，图像截断 | output 中有 number of Kohn-Sham states |
+| `K_POINTS crystal_b` | 描述高对称路径 | 用 uniform mesh 画 bands | output k 点序列应对应路径 |
+| `nosym` | 特定非标准路径、低维或磁性场景可能需要 | 不分析对称性就开关 | 检查对称性和 k 点是否被改写 |
 
-## 7. 输出文件与判断标准
+## 通用输出审阅模板
 
-必须检查：
+```markdown
+## Output Review
 
-- SCF 是否已经可靠完成。
-- bands 计算是否读取了同一 `prefix/outdir`。
-- k-path 是否对应目标晶体的 primitive cell。
-- `nbnd` 是否覆盖关注的价带和导带范围。
-- Fermi energy 参考是否清楚；画图时是否统一能量零点。
-- 若存在交叉或简并，`bands.x` 排序结果是否需要人工检查。
+- Program:
+- Calculation type:
+- QE version:
+- SCF dependency:
+- `prefix/outdir` consistency:
+- Structure / cell convention:
+- K-path source:
+- K-path labels:
+- Number of bands:
+- Fermi energy reference:
+- Band data file:
+- Warnings:
+- PASS / WARN / BLOCK:
+- Reason:
+- Allowed downstream workflows:
+```
 
-图像判断：
+## 输出判断标准
 
-- 带隙大小、直接/间接类型。
-- Fermi level 是否穿过能带。
-- 高对称点标签是否与路径一致。
-- 异常断裂、突跳或重复路径是否来自 k-path/坐标错误。
+- bands 计算应读取同一 `prefix/outdir` 下的 SCF ground state。
+- `<k_path>` 必须对应当前使用的 cell convention；primitive/conventional cell 混用会导致标签错误。
+- `nbnd` 应覆盖关注的价带和导带范围。
+- 画图前必须明确能量零点：Fermi energy、VBM、CBM 或自定义参考。
+- 高对称点标签、路径段数量和绘图横轴应与 `<k_path>` 记录一致。
+- 若存在 band crossing 或异常跳变，需要检查 `bands.x` 排序和原始 eigenvalues。
 
-## 8. 收敛性要求
+## 收敛性要求
 
-Bands 图的漂亮不代表结果可信。至少需要：
+- 使用已经通过审阅的 SCF cutoff、k 点、赝势和 occupation 设置。
+- 对金属或小带隙体系，检查 smearing 和 SCF k 点对 Fermi 附近能带的影响。
+- 对 SOC、磁性、DFT+U、应变等体系，bands 设置应与 SCF 的物理模型保持一致。
 
-- 使用已收敛的 SCF cutoff/k 点/赝势。
-- 对金属或小带隙体系检查 smearing 和 k 点对 Fermi 附近能带的影响。
-- 对 SOC、磁性、DFT+U、应变等体系，保持与 SCF 设置完全一致。
-
-## 9. 常见错误与诊断
+## 常见错误与诊断
 
 | 现象 | 可能原因 | 排查顺序 |
 |---|---|---|
-| bands.x 找不到数据 | `prefix/outdir` 不一致或 scratch 被清理 | 先看 SCF 和 bands 输入 |
-| 图上高对称点不对 | primitive/conventional cell 混用 | 用 seekpath 或 spglib 重新标准化 |
+| `bands.x` 找不到数据 | `prefix/outdir` 不一致或 scratch 被清理 | 先看 SCF 和 bands 输入 |
+| 高对称点标签不对 | cell convention 或 k-path 坐标基底错误 | 重新检查结构标准化和路径来源 |
 | 导带不够 | `nbnd` 太小 | 增加 `nbnd` 并重跑 bands |
 | DOS 与 bands 金属性判断不一致 | DOS k mesh 不足或能量零点不一致 | 分别检查 DOS workflow 和 Fermi reference |
-| 能带乱跳 | band crossing、排序、对称性或路径问题 | 检查 `bands.x` 输出和原始 eigenvalues |
+| 能带跳变 | band crossing、排序、对称性或路径问题 | 检查 `bands.x` 输出和原始 eigenvalues |
 
-## 10. 最小可运行案例
+## 通用学习模板
 
-建议第一版使用 Si：
+学习时应选择结构简单、电子状态明确、k-path 来源可靠的体系。具体体系不写入本仓库主文档；个人学习记录中应保留 input、output、路径来源、绘图脚本和 output review。
 
-- SCF：`pw.scf.Si.in`
-- Bands：`pw.bands.Si.in`
-- Post：`bands.Si.in`
-- Plot：`bands.Si.dat` -> Python/matplotlib
-
-必须记录：
-
-- k-path 来源：seekpath、教程、文献或手工。
-- 使用 primitive cell 还是 conventional cell。
-- 能量零点：Fermi energy、VBM 或其他。
-
-## 11. 与其他 workflow 的关系
-
-- 与 SCF：bands 依赖 SCF ground state。
-- 与 DOS/PDOS：bands 解释沿路径的色散，DOS/PDOS 解释态密度和轨道贡献，二者互补。
-- 与 Wannier90：若需要高精度插值、Berry curvature、输运等，应进入 Wannier workflow。
-
-## 12. GitHub 记录规范
+## 记录模板
 
 ```text
 pw.scf.<system>.in
@@ -196,18 +197,23 @@ kpath-source.md
 record.md
 ```
 
-`kpath-source.md` 至少写明：标准化工具、晶胞选择、路径标签、坐标基底。
+`kpath-source.md` 至少写明：结构标准化工具、cell convention、路径标签、坐标基底和是否人工修改。
 
-## 13. 资料来源
+## 与其他 workflow 的关系
 
-- 已有调研：`Quantum ESPRESSO as a Modern Research Stack.md`
-- 已有调研：`Quantum ESPRESSO Tutorial Website Ecosystem.md`
+- 与 SCF：bands 依赖 SCF ground state。
+- 与 DOS/PDOS：bands 解释路径色散，DOS/PDOS 解释态密度和轨道贡献。
+- 与 Wannier90：若需要高精度插值、Berry curvature、输运等，应进入 Wannier workflow。
+
+## 资料来源
+
 - QE `bands.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_BANDS.html>
+- QE `pw.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_PW.html>
 - SeeK-path documentation: <https://seekpath.readthedocs.io/>
 - Pranab Das QE tutorial: <https://pranabdas.github.io/espresso/>
 
-## 14. 后续完善重点
+## 后续完善重点
 
-- Si/GaAs bands 的input/output 阅读示例。
-- k-path 来源文件或脚本。
-- band figure 生成脚本和能量零点说明。
+- 补充 k-path 来源记录规范。
+- 补充 band figure 能量零点和标签检查规范。
+- 补充 `nbnd`、SOC、磁性和 DFT+U 场景下的 bands 审阅要点。

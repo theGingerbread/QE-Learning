@@ -22,7 +22,7 @@ post-processing、structure inspection、phonon mode visualization、Fermi surfa
 
 ## 6. 它和本仓库哪些页面对应？
 
-- `learn/06-postprocessing-loop.md`
+- `learn/07-postprocessing-loop.md`
 - 结构操作独立学习项目
 
 ## 7. 它的局限是什么？

@@ -22,7 +22,7 @@ Materials Cloud QE school materials 是学校/培训型 QE 教学资源，是高
 
 ## 6. 它和本仓库哪些页面对应？
 
-- `learn/08-feature-expansion-map.md`
+- `learn/09-feature-expansion-map.md`
 - `workflows/phonon/electron-phonon-overview.md`（待补）
 - `workflows/advanced-native/dft-plus-u.md`（待补）
 
