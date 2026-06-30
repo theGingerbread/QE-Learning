@@ -1,34 +1,33 @@
 # QE Official Learn
 
-## 1. 它是什么？
+## 它适合解决什么学习问题？
 
-QE 官方学习入口和 documentation 页面提供官方教程、user guide 与 package 文档索引。
+作为官方学习入口导航，用于寻找学校材料、教程入口和官方维护的学习资源。
 
-## 2. 适合学习什么？
+## 覆盖哪些 QE workflow？
 
-适合确认官方推荐材料、程序边界和文档入口。
+- SCF basics
+- post-processing
+- phonon and advanced topics depending on material
 
-## 3. 覆盖哪些 QE workflow？
+## 适合跟读的部分
 
-覆盖范围随官方页面更新，通常包括 PWscf、PHonon、PostProc 和其他官方 package。
+- 用于定位官方教学入口和版本相关说明。
 
-## 4. 哪些部分适合跟做？
+## 只适合作为参考的部分
 
-官方 hands-on 例子适合作为学习材料，但仍需按本仓库 standards 做 output review。
+- 具体参数仍回到 official documentation 和 `INPUT_*` reference 核对。
 
-## 5. 哪些部分只适合参考？
+## 与本仓库页面的对应关系
 
-总览页面适合索引，不等于完整学习路线。
+- [learn/00-start-here.md](../../learn/00-start-here.md)
+- [references/tutorial-sites/official-qe-docs.md](../../references/tutorial-sites/official-qe-docs.md)
 
-## 6. 它和本仓库哪些页面对应？
+## 局限
 
-- `learn/00-start-here.md`
-- `references/source-index.md`
+它是入口导航，不是单一 workflow 规范。
 
-## 7. 局限
+## 原始链接
 
-官方入口按资源列举，不一定显式说明 workflow DAG 和 PASS/WARN/BLOCK 判断。
-
-## 8. 原始链接
-
+- [QE learn page](https://www.quantum-espresso.org/learn/)
 - [QE documentation](https://www.quantum-espresso.org/documentation/)

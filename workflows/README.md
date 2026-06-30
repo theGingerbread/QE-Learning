@@ -6,7 +6,7 @@
 
 - `ground-state/`：SCF、NSCF、收敛、relax、vc-relax。
 - `electronic/`：bands、DOS、PDOS、charge density、potential、ELF、work function、Fermi surface。
-- `phonon/`：Gamma phonon、DFPT dispersion、phonon DOS、Born charge、IR/Raman、debugging。
+- `phonon/`：Gamma phonon、DFPT dispersion、phonon DOS、Born effective charge、IR/Raman、debugging。
 - `advanced/`：spin、SOC、DFT+U、vdW、hybrid、MD、NEB、EPC、Wannier90、pseudopotential generation overview。
 
 高级功能页面用于建立边界和最低学习目标，不替代官方专门教程。

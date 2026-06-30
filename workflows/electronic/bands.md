@@ -205,15 +205,15 @@ record.md
 - 与 DOS/PDOS：bands 解释路径色散，DOS/PDOS 解释态密度和轨道贡献。
 - 与 Wannier90：若需要高精度插值、Berry curvature、输运等，应进入 Wannier workflow。
 
+## 后续完善重点
+
+- 补充 k-path 来源记录规范。
+- 补充 band figure 能量零点和标签检查规范。
+- 补充 `nbnd`、SOC、磁性和 DFT+U 场景下的 bands 审阅要点。
+
 ## 资料来源
 
 - QE `bands.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_BANDS.html>
 - QE `pw.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_PW.html>
 - SeeK-path documentation: <https://seekpath.readthedocs.io/>
 - Pranab Das QE tutorial: <https://pranabdas.github.io/espresso/>
-
-## 后续完善重点
-
-- 补充 k-path 来源记录规范。
-- 补充 band figure 能量零点和标签检查规范。
-- 补充 `nbnd`、SOC、磁性和 DFT+U 场景下的 bands 审阅要点。

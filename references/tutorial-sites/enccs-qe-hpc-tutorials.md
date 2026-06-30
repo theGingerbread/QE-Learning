@@ -1,35 +1,33 @@
 # ENCCS QE HPC Tutorials
 
-## 1. 它是什么？
+## 它适合解决什么学习问题？
 
-ENCCS QE tutorials 是面向 HPC 环境的 QE 教学材料，包含 QE 基础运行和 phonon 教程。
+学习在 HPC 环境运行 QE、理解并行执行、作业脚本和性能相关边界。
 
-## 2. 适合学习什么？
+## 覆盖哪些 QE workflow？
 
-适合学习模块加载、并行运行、HPC 脚本和集群环境中的 QE 执行方式。
+- SCF on HPC
+- phonon on HPC
+- parallel execution and job scheduling
 
-## 3. 覆盖哪些 QE workflow？
+## 适合跟读的部分
 
-SCF、基础 QE 运行、phonon 相关教程和 HPC 执行环境。
+- 适合跟读 Slurm/job script 组织、MPI 运行方式和作业资源设置。
 
-## 4. 哪些部分适合跟做？
+## 只适合作为参考的部分
 
-适合跟做环境设置、并行命令、作业脚本和 phonon 运行流程。
+- HPC 参数不替代物理收敛；资源设置和科学可信度需要分开记录。
 
-## 5. 哪些部分只适合参考？
+## 与本仓库页面的对应关系
 
-站点特定的模块名、队列名和资源配置只适合作为参考，需要按本地集群修改。
+- [learn/08-hpc-and-reproducibility.md](../../learn/08-hpc-and-reproducibility.md)
+- [standards/calculation-record-template.md](../../standards/calculation-record-template.md)
 
-## 6. 它和本仓库哪些页面对应？
+## 局限
 
-- `learn/08-hpc-and-reproducibility.md`
-- `standards/calculation-record-template.md`
+教程环境和模块系统与个人集群可能不同，需要本地化记录。
 
-## 7. 局限
-
-HPC 教程通常弱化物理判断；仍需回到 output review 和 PASS/WARN/BLOCK。
-
-## 8. 原始链接
+## 原始链接
 
 - [ENCCS QE tutorial](https://enccs.github.io/efficient-materials-modelling-on-hpc/espresso-tutorial/)
 - [ENCCS QE phonons tutorial](https://enccs.github.io/efficient-materials-modelling-on-hpc/espresso-tutorial-phonons/)

@@ -20,7 +20,7 @@ structure + pseudopotential
 - convergence policy：cutoff、k 点、smearing、SCF 阈值和下游准入。
 - optimized structure：`relax` 或 `vc-relax` 后的结构和 final static SCF。
 - electronic observables：bands、DOS、PDOS、charge density、potential、ELF、work function。
-- response observables：phonon、dielectric tensor、Born charge、IR/Raman、EPC。
+- response observables：phonon、dielectric tensor、Born effective charge、IR/Raman、EPC。
 
 ## 学习原则
 

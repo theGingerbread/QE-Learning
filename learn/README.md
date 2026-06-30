@@ -6,7 +6,7 @@
 |---|---|---|
 | `00-start-here.md` | 知道如何使用本仓库 | 能说清为什么先学 QE 原生 workflow |
 | `01-qe-workflow-map.md` | 建立 QE 主计算图 | 能画出 SCF、收敛、relax、电子结构、声子和后处理的依赖关系 |
-| `02-first-scf-loop.md` | 建立第一个可信 SCF 闭环 | 能读 input/output 并给出 PASS/WARN/BLOCK |
+| `02-first-scf-loop.md` | 建立第一个可信 SCF 闭环 | 能读 input/output 并给出 PASS / WARN / BLOCK |
 | `03-convergence-loop.md` | 建立数值收敛判断 | 能记录 cutoff、k 点、smearing 的最小测试 |
 | `04-relaxation-loop.md` | 理解结构优化在 QE 中的角色 | 能读 force/stress 并判断是否允许下游 |
 | `05-electronic-structure-loop.md` | 掌握 bands/DOS/PDOS 主线 | 能区分 k-path 与 uniform k mesh |

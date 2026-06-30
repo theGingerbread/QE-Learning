@@ -1,34 +1,32 @@
 # SeeK-path
 
-## 1. 它是什么？
+## 它适合解决什么学习问题？
 
-SeeK-path 是用于晶体结构标准化和高对称 k-path 生成的工具。
+为标准化结构生成 high-symmetry k-path，服务 bands workflow 的路径来源记录。
 
-## 2. 适合学习或解决什么问题？
+## 覆盖哪些 QE workflow？
 
-它解决 bands workflow 中最常见的问题：k-path 必须与标准化后的晶胞和 reciprocal-space convention 一致。
+- bands
+- k-path source recording
+- structure standardization boundary
 
-## 3. 它覆盖哪些 QE workflow？
+## 适合跟读的部分
 
-主要覆盖 `SCF -> bands` 的 k-path 生成，也影响结构标准化和 band label 解释。
+- 用已检查的 `<structure>` 生成 primitive cell 与 high-symmetry path，并记录 cell convention。
 
-## 4. 哪些部分适合跟做？
+## 只适合作为参考的部分
 
-用一个已检查过的 `<structure>` 生成 primitive cell 与 high-symmetry path，并和 QE `K_POINTS crystal_b` 对照。
+- 结构构建细节放在独立 Structure-Learning 项目；本仓库只记录 QE k-path 使用要求。
 
-## 5. 哪些部分只适合作为参考？
+## 与本仓库页面的对应关系
 
-复杂磁性、非标准 cell、低维体系或人为 symmetry breaking 场景，需要人工判断是否使用标准 k-path。
+- [workflows/electronic/bands.md](../../workflows/electronic/bands.md)
+- [theory-minimum/kpoints-symmetry-kpath.md](../../theory-minimum/kpoints-symmetry-kpath.md)
 
-## 6. 它和本仓库哪些页面对应？
+## 局限
 
-- `workflows/electronic/bands.md`
-- 结构操作独立学习项目
+SeeK-path 生成路径不等于 bands 结果可信；SCF、赝势和收敛仍需独立审阅。
 
-## 7. 它的局限是什么？
-
-SeeK-path 给出路径，不保证你的 SCF、结构、赝势和 bands 计算已经可信。
-
-## 8. 原始链接与引用
+## 原始链接
 
 - [SeeK-path documentation](https://seekpath.readthedocs.io/en/latest/maindoc.html)

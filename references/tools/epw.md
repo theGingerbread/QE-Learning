@@ -1,34 +1,34 @@
 # EPW
 
-## 1. 它是什么？
+## 它适合解决什么学习问题？
 
-EPW 是 QE 生态中的 electron-phonon coupling 和 Wannier 插值相关高级包。
+作为 electron-phonon coupling、Wannier interpolation 和相关输运/超导性质的高级参考入口。
 
-## 2. 适合学习或解决什么问题？
+## 覆盖哪些 QE workflow？
 
-适合在已经掌握 SCF、NSCF、phonon、Wannier 基础后，研究电声耦合、输运和超导相关问题。
+- DFPT phonon
+- electron-phonon overview
+- Wannier interpolation
+- advanced EPC analysis
 
-## 3. 它覆盖哪些 QE workflow？
+## 适合跟读的部分
 
-EPC、Eliashberg spectral function、carrier mobility、superconductivity 等高级分支。
+- 先读数据依赖图：SCF/NSCF、phonon、Wannier、EPW input 的关系。
 
-## 4. 哪些部分适合跟做？
+## 只适合作为参考的部分
 
-官方或学校材料中的最小 EPC 示例。
+- EPW 不进入基础学习路径；需要先完成严格 SCF、phonon 和 Wannier 前置审阅。
 
-## 5. 哪些部分只适合作为参考？
+## 与本仓库页面的对应关系
 
-在 phonon、q-grid、smearing、Wannier 和 convergence 尚未建立前，EPW 不应作为入门路线。
+- [workflows/advanced/electron-phonon-overview.md](../../workflows/advanced/electron-phonon-overview.md)
+- [workflows/advanced/wannier90-overview.md](../../workflows/advanced/wannier90-overview.md)
 
-## 6. 它和本仓库哪些页面对应？
+## 局限
 
-- `workflows/phonon/electron-phonon-overview.md`（待补）
-- `references/tools/wannier90.md`
+EPW 对前置数据质量高度敏感，不能用作修复未收敛 phonon 或不合格 Wannierization 的工具。
 
-## 7. 它的局限是什么？
+## 原始链接
 
-EPW 对前置计算质量极敏感，任何 SCF/phonon/Wannier 问题都会传递到 EPC 结论。
-
-## 8. 原始链接与引用
-
+- [EPW documentation](https://docs.epw-code.org/)
 - [QE documentation](https://www.quantum-espresso.org/documentation/)

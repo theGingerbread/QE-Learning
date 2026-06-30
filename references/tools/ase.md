@@ -1,36 +1,35 @@
 # ASE
 
-## 1. 它是什么？
+## 它适合解决什么学习问题？
 
-ASE（Atomic Simulation Environment）是 Python 原子结构与计算工作流脚本库，可用于结构构建、格式转换、批量生成输入和轻量后处理。
+把结构对象、格式转换和批量输入生成纳入脚本化学习，但仍保留 QE input/output 人工审阅。
 
-## 2. 适合学习或解决什么问题？
+## 覆盖哪些 QE workflow？
 
-适合把 CIF/结构对象转成可脚本处理的结构，生成参数扫描，管理个人学习或科研计算中的 QE input/output。它不替代 QE，也不替代收敛判断。
+- structure preparation
+- SCF input generation
+- parameter sweeps
+- light post-processing
 
-## 3. 它覆盖哪些 QE workflow？
+## 适合跟读的部分
 
-结构准备、SCF input 生成、convergence sweep、relax 输入整理、批量 case 组织。
+- read/write 结构对象、生成 QE input、管理参数扫描脚本。
 
-## 4. 哪些部分适合跟做？
+## 只适合作为参考的部分
 
-学习 structure object、read/write、supercell、简单 QE input writer。
+- ASE 的 QE IO 有实现边界；关键 input 仍需人工核对。
 
-## 5. 哪些部分只适合作为参考？
+## 与本仓库页面的对应关系
 
-ASE 的 QE IO 有实现边界；实际使用应优先保持 `ibrav=0` 风格并人工核对 cell。
+- [workflows/ground-state/scf.md](../../workflows/ground-state/scf.md)
+- [standards/input-file-naming.md](../../standards/input-file-naming.md)
+- [standards/calculation-record-template.md](../../standards/calculation-record-template.md)
 
-## 6. 它和本仓库哪些页面对应？
+## 局限
 
-- 结构操作独立学习项目
-- `workflows/ground-state/scf.md`
-- `standards/source-traceability.md`
+ASE 不能判断赝势、cutoff、k 点或物理结果是否可信。
 
-## 7. 它的局限是什么？
-
-ASE 能帮助构造文件，但不能判断赝势、cutoff、k 点和物理结果是否可信。
-
-## 8. 原始链接与引用
+## 原始链接
 
 - [ASE documentation](https://ase.gitlab.io/ase)
-- [ASE espresso IO source](https://ase-lib.org/_modules/ase/io/espresso.html)
+- [ASE espresso IO](https://ase-lib.org/_modules/ase/io/espresso.html)

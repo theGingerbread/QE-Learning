@@ -1,35 +1,33 @@
 # pymatgen
 
-## 1. 它是什么？
+## 它适合解决什么学习问题？
 
-pymatgen 是 Materials Project 生态中的材料结构、对称性、超胞和分析库。
+处理结构对象、格式转换和材料数据接口，辅助生成 QE 学习输入和后处理数据。
 
-## 2. 适合学习或解决什么问题？
+## 覆盖哪些 QE workflow？
 
-适合处理结构标准化、超胞、缺陷前处理和材料数据结构。QE IO 需要谨慎，QE 支持主要依赖外部 `pymatgen-io-espresso`。
+- structure preparation
+- k-path and symmetry workflows through related tools
+- data conversion
 
-## 3. 它覆盖哪些 QE workflow？
+## 适合跟读的部分
 
-结构准备、缺陷/超胞准备、材料数据清洗、可能的 input 生成。
+- 结构读写、对象检查、与 seekpath/spglib 类工具配合。
 
-## 4. 哪些部分适合跟做？
+## 只适合作为参考的部分
 
-结构读写、primitive/conventional cell、space group、supercell。
+- QE provenance、restart、scheduler 仍需本仓库 standards 或高级 provenance 工具。
 
-## 5. 哪些部分只适合作为参考？
+## 与本仓库页面的对应关系
 
-QE input/output 写入读取相关功能应先用简单、可复查的个人练习任务验证，不应直接作为生产标准。
+- [workflows/electronic/bands.md](../../workflows/electronic/bands.md)
+- [standards/calculation-record-template.md](../../standards/calculation-record-template.md)
 
-## 6. 它和本仓库哪些页面对应？
+## 局限
 
-- 结构操作独立学习项目
-- `workflows/electronic/bands.md`
-- `workflows/advanced-native/neb-reaction-path.md`（待补）
+pymatgen 不是 QE-native workflow engine；生成文件后仍需 output review。
 
-## 7. 它的局限是什么？
+## 原始链接
 
-它不是 QE-native workflow engine。QE provenance、restart、scheduler 仍需 AiiDA 或本仓库 standards 记录。
-
-## 8. 原始链接与引用
-
+- [pymatgen documentation](https://pymatgen.org/)
 - [pymatgen-io-espresso](https://github.com/oashour/pymatgen-io-espresso)

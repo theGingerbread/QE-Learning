@@ -16,9 +16,9 @@
 
 | tested parameter | fixed parameters | observed output | decision |
 |---|---|---|---|
-| `ecutwfc` | structure, pseudo, k mesh | total energy / force / stress | PASS/WARN/BLOCK |
-| k mesh | structure, pseudo, cutoff | total energy / Fermi level | PASS/WARN/BLOCK |
-| smearing | metallic system setup | SCF stability / energy trend | PASS/WARN/BLOCK |
+| `ecutwfc` | structure, pseudo, k mesh | total energy / force / stress | PASS / WARN / BLOCK |
+| k mesh | structure, pseudo, cutoff | total energy / Fermi level | PASS / WARN / BLOCK |
+| smearing | metallic system setup | SCF stability / energy trend | PASS / WARN / BLOCK |
 
 ## 推荐阅读
 

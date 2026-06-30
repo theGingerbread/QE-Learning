@@ -1,34 +1,34 @@
 # Wannier90
 
-## 1. 它是什么？
+## 它适合解决什么学习问题？
 
-Wannier90 是最大局域 Wannier 函数工具，QE 通过 `pw2wannier90.x` 与其对接。
+学习 QE 电子结构到 Wannier interpolation 的数据边界，用于能带插值、Berry 相关量和输运前置分析。
 
-## 2. 适合学习或解决什么问题？
+## 覆盖哪些 QE workflow？
 
-适合能带插值、轨道模型、Berry 相关性质和输运前处理。
+- QE -> pw2wannier90.x -> Wannier90
+- bands interpolation
+- advanced transport pre-processing
 
-## 3. 它覆盖哪些 QE workflow？
+## 适合跟读的部分
 
-高级电子结构、插值 bands、Wannier transport、EPW 前处理。
+- 理解 projections、disentanglement、frozen window 和 `pw2wannier90.x` 接口。
 
-## 4. 哪些部分适合跟做？
+## 只适合作为参考的部分
 
-先从简单半导体 bands 插值开始，再进入复杂投影和拓扑/输运。
+- Wannierization 质量不能只看流程完成，需要检查插值 bands 与 QE bands 对照。
 
-## 5. 哪些部分只适合作为参考？
+## 与本仓库页面的对应关系
 
-初学者不应在 SCF、bands、DOS 尚不稳定时直接进入 Wannierization。
+- [workflows/advanced/wannier90-overview.md](../../workflows/advanced/wannier90-overview.md)
+- [workflows/electronic/bands.md](../../workflows/electronic/bands.md)
 
-## 6. 它和本仓库哪些页面对应？
+## 局限
 
-- `workflows/spectroscopy-transport/wannier-transport.md`（待补）
-- `references/tools/epw.md`
+Wannier90 是高级电子结构工具，不替代 QE 基础 bands/DOS 学习。
 
-## 7. 它的局限是什么？
+## 原始链接
 
-Wannier 投影质量和能窗选择会强烈影响结果，需要单独验证，不是自动后处理。
-
-## 8. 原始链接与引用
-
+- [Wannier90](https://wannier.org/)
+- [Wannier90 documentation](https://wannier90.readthedocs.io/)
 - [QE INPUT_pw2wannier90](https://www.quantum-espresso.org/Doc/INPUT_pw2wannier90.html)

@@ -1,36 +1,35 @@
 # AiiDA-QE Optional Reference
 
-## 1. 它是什么？
+## 它适合解决什么学习问题？
 
-AiiDA-QE 是 AiiDA 的 Quantum ESPRESSO plugin，用于把 QE calculations 组织为带 provenance、restart 和 scheduler 语义的 workflow graph。
+作为高级 workflow/provenance 参考，理解计算图、输入输出追踪、restart 和 scheduler 集成。
 
-## 2. 适合学习什么？
+## 覆盖哪些 QE workflow？
 
-它适合作为高级 workflow/provenance 参考，帮助理解如何记录计算图、输入输出、远程调度和 restart。
+- SCF/relax/bands/DOS wrappers
+- provenance graph
+- scheduler integration
+- restart management
 
-## 3. 覆盖哪些 QE workflow？
+## 适合跟读的部分
 
-AiiDA-QE 可以封装 SCF、relax、bands、DOS/PDOS、PHonon 等分支。本仓库的基础学习路径优先围绕 QE 原生命令行 workflow 组织，AiiDA-QE 放在高级 workflow/provenance 参考中。
+- 在能手动完成 QE 原生命令行 workflow 后，再阅读 AiiDA-QE tutorials 或 workchain 文档。
 
-## 4. 哪些部分适合跟做？
+## 只适合作为参考的部分
 
-在已经能手动完成 SCF、收敛、bands/DOS 和 phonon 后，可以跟做 AiiDA-QE tutorials 或 `PwBandsWorkChain` 来理解 provenance graph。
+- database、daemon、profile、remote computer 和 scheduler 概念只作为自动化系统设计参考。
 
-## 5. 哪些部分只适合参考？
+## 与本仓库页面的对应关系
 
-该工具引入 database、daemon、profile、remote computer 和 scheduler 等额外概念，适合作为自动化和 provenance 的高级参考。
+- [learn/08-hpc-and-reproducibility.md](../../learn/08-hpc-and-reproducibility.md)
+- [standards/calculation-record-template.md](../../standards/calculation-record-template.md)
+- [standards/citation-and-source-policy.md](../../standards/citation-and-source-policy.md)
 
-## 6. 它和本仓库哪些页面对应？
+## 局限
 
-- `learn/08-hpc-and-reproducibility.md`
-- `standards/calculation-record-template.md`
-- `standards/citation-and-source-policy.md`
+AiiDA 组织和追踪 workflow，不替代物理判断、收敛测试和 output review。
 
-## 7. 局限
-
-AiiDA 负责组织和追踪 workflow，不负责替代物理判断、收敛测试和 output review。错误结构、错误赝势或未收敛参数仍会产生错误结果。
-
-## 8. 原始链接
+## 原始链接
 
 - [AiiDA-QE tutorials](https://aiida-quantumespresso.readthedocs.io/en/latest/tutorials/)
 - [AiiDA-QE PwBandsWorkChain](https://aiida-quantumespresso.readthedocs.io/en/latest/howto/run_pwbands.html)

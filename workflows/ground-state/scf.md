@@ -28,6 +28,11 @@ SCF 是 QE workflow 的基础数据边。relax、bands、DOS、PDOS、phonon、c
   -> downstream workflow
 ```
 
+## 需要的 QE 程序
+
+- `pw.x`：执行 `calculation='scf'`，生成 ground-state charge density、eigenvalues 和后续程序需要读取的 scratch 数据。
+- 下游程序通过一致的 `prefix/outdir` 读取该 SCF 状态。
+
 ## 通用输入模板
 
 ```fortran
@@ -151,7 +156,7 @@ record.md
 pseudo-source.md
 ```
 
-`record.md` 应写清楚结构来源、赝势来源、命令、环境、收敛状态、PASS/WARN/BLOCK 判断和允许进入的下游 workflow。
+`record.md` 应写清楚结构来源、赝势来源、命令、环境、收敛状态、PASS / WARN / BLOCK 判断和允许进入的下游 workflow。
 
 ## 与其他 workflow 的关系
 
@@ -160,13 +165,13 @@ pseudo-source.md
 - `DOS/PDOS`：通常需要 SCF 后接 dense k-mesh NSCF。
 - `phonon`：`ph.x` 直接依赖 SCF 产生的数据，且对 SCF 质量更敏感。
 
+## 后续完善重点
+
+- 逐项解释 output 中 total energy、SCF accuracy、Fermi energy、cutoff、k-points、pseudopotential 段落。
+- 补充 SCF 不收敛、旧 scratch 误读、occupation 设置错误的通用诊断笔记。
+
 ## 资料来源
 
 - QE `pw.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_PW.html>
 - QE documentation: <https://www.quantum-espresso.org/documentation/>
 - Pranab Das SCF tutorial: <https://pranabdas.github.io/espresso/hands-on/scf>
-
-## 后续完善重点
-
-- 逐项解释 output 中 total energy、SCF accuracy、Fermi energy、cutoff、k-points、pseudopotential 段落。
-- 补充 SCF 不收敛、旧 scratch 误读、occupation 设置错误的通用诊断笔记。

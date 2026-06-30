@@ -18,7 +18,7 @@ QE 的可靠性证据在 output 中：total energy、SCF iteration、estimated a
 
 ## 为什么要保留计算记录？
 
-个人学习笔记也需要可追溯。至少记录结构来源、赝势来源、input 文件、命令、QE 版本、运行环境、output 摘要、收敛状态和 PASS/WARN/BLOCK 判断。
+个人学习笔记也需要可追溯。至少记录结构来源、赝势来源、input 文件、命令、QE 版本、运行环境、output 摘要、收敛状态和 PASS / WARN / BLOCK 判断。
 
 ## 结构学习边界
 
