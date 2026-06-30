@@ -3,61 +3,63 @@
 ## 页面定位
 
 - 对应学习路线：[learn/06-phonon-dfpt-loop.md](../../learn/06-phonon-dfpt-loop.md)
-- 上游依赖：insulating relaxed structure + strict SCF + Gamma DFPT
-- 下游用途：LO-TO splitting / IR analysis / non-analytic correction
+- 上游依赖：insulating relaxed structure + Gamma DFPT
+- 下游用途：LO-TO splitting, non-analytic correction, IR branch
 - 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
 ## 计算目标
 
-通过 Gamma DFPT 计算介电张量和 Born effective charge，并判断其是否可用于非解析项和 LO-TO splitting。
+使用 `epsil=.true.` 在 Gamma limit 计算 dielectric tensor 和 Born effective charge，并审阅它们是否可用于 LO-TO splitting 和 non-analytic correction。
 
 ## 输入前提
 
-- `<structure>`、`<pseudo>`、`<system>` 和上游 workflow 已记录。
-- cutoff、k 点、occupation、收敛阈值和物理模型与本 workflow 目标一致。
-- 已明确本 workflow 的目标性质、准入条件和下游用途。
+- 结构已充分优化，并通过 SCF output review。
+- SCF 的 cutoff、k 点、smearing 和 `conv_thr` 已按 phonon 目标审阅。
+- 已明确该页是 Gamma phonon、q-grid、DOS、响应张量还是 debugging 分支。
 
 ## 计算图
 
 ```text
-<insulating relaxed structure + strict SCF + Gamma DFPT>
-  -> ph.x, `dynmat.x`
-  -> <intermediate_state>
-  -> <reviewed_output>
+pw.x scf
+  -> ph.x at Gamma with epsil=.true.
+  -> dielectric tensor + Born effective charge
+  -> dynmat.x / matdyn.x non-analytic branch when valid
 ```
 
 ## 需要的 QE 程序
 
-`ph.x`, `dynmat.x`
+`ph.x`、`dynmat.x`、`matdyn.x`
 
 ## 通用输入模板
 
-```text
-<program>.<workflow>.<system>.in
-
-<namelist_or_cards>
-  calculation_or_task = 'dielectric-born'
-  prefix = '<system>'
-  outdir = '<scratch_dir>'
-  <input_dependency> = '<upstream_output>'
-  <key_parameter> = <value>
+```fortran
+&INPUTPH
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  tr2_ph = <phonon_threshold>,
+  trans = .true.,
+  epsil = .true.,
+  fildyn = '<system>.dynG',
+/
+0.0 0.0 0.0
 ```
 
 ## 输入字段说明
 
 | 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
-| `epsil` | ph.x | 请求介电张量和 Born effective charges | 在金属或不适用场景使用 | ph output dielectric/Born 段落 |
-| `trans` | ph.x | 计算声子扰动 | 只请求电场响应而漏算模式 | ph output perturbations |
-| `asr` | dynmat.x | Gamma 模式后处理 | 误把 ASR 修正当作物理结果 | dynmat output |
+| `epsil` | ph.x | 请求 dielectric tensor 和 Born effective charge | 金属或不适用体系中解释 | ph.x output 中张量段落 |
+| `trans` | ph.x | 同时计算 phonon perturbations | 只要电场响应不审阅声子 | perturbation 输出 |
+| `fildyn` | ph.x | Gamma dynamical matrix | 后处理读错文件 | dynmat/matdyn output |
+| `asr/non-analytic options` | dynmat.x/matdyn.x | LO-TO 和 ASR 后处理 | 条件不满足仍解释 splitting | 后处理输出 |
 
 ## 通用输出审阅模板
 
 ```markdown
-## Output Review
+## output review
 
-- Program:
-- Calculation type:
+- QE 程序:
+- 计算类型:
 - QE version:
 - Input dependency:
 - Structure summary:
@@ -65,7 +67,7 @@
 - Cutoff reported:
 - K-points reported:
 - Convergence status:
-- Main numerical result:
+- 本 workflow 关键输出:
 - Warnings:
 - Scratch / restart status:
 - PASS / WARN / BLOCK:
@@ -75,50 +77,48 @@
 
 ## 输出判断标准
 
-- 程序正常结束只代表执行完成；还需要检查关键输出、warning 和上游依赖是否一致。
-- 结果进入下游前，应能说明本 workflow 的目标量、数值设置和物理模型没有互相冲突。
-- PASS / WARN / BLOCK 判断必须引用 output 中的具体证据。
+- 确认体系被作为绝缘体响应问题处理；金属情形应 BLOCK 或单独说明。
+- dielectric tensor 和 Born effective charge 张量应完整输出。
+- electric-field perturbations 和 phonon perturbations 都应收敛。
+- LO-TO splitting 解释需要记录方向、非解析项和 ASR 设置。
 
 ## 收敛性要求
 
-- 上游 SCF 或结构优化应满足本 workflow 的目标精度。
-- cutoff、k 点、smearing、q-grid 或高级模型参数需要围绕目标量检查敏感性。
-- 如果本页只是高级边界页，应记录哪些收敛测试必须在专门 workflow 中完成。
+- SCF/phonon 阈值、结构残余力和 cutoff/k 点都影响响应张量。
+- `epsil` 分支不替代 q-grid phonon dispersion。
 
 ## 常见错误与诊断
 
 | 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| 程序完成但结果不可解释 | 上游依赖、参数或物理模型记录不足 | 先核对 input、output header、scratch 和 record |
-| 下游读取失败 | `prefix/outdir`、文件前缀或中间文件不一致 | 检查文件名、路径和 output 中的读取信息 |
-| 数值趋势不稳定 | cutoff、k 点、smearing、q-grid 或模型参数未收敛 | 回到对应 convergence workflow |
+| 没有 dielectric tensor | `epsil` 未开启或物理条件不适用 | 检查 ph.x input/output warning |
+| Born effective charge 异常 | 结构、赝势或响应未收敛 | 复查 SCF/phonon convergence |
+| LO-TO 解释混乱 | 未记录方向和 non-analytic 设置 | 补充 dynmat/matdyn 记录 |
 
 ## 通用学习模板
 
-使用 `<system>`、`<structure>`、`<pseudo>`、`<workflow>`、`<upstream_output>` 等占位符记录个人学习任务。本仓库只提供通用审阅框架，不保存具体计算结果。
+使用 `<system>`、`<q_grid>`、`<q_path>`、`<asr_scheme>`、`<phonon_threshold>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
 ## 记录模板
 
 ```text
-<program>.<workflow>.<system>.in
-<program>.<workflow>.<system>.out
+ph.epsil.<system>.in
+ph.epsil.<system>.out
+dynmat.<system>.in
+dynmat.<system>.out
 record.md
 ```
 
 ## 与其他 workflow 的关系
 
-- 上游 workflow 决定本页输入是否可信。
-- 本页输出只有通过 output review 后才能进入下游。
-- 与收敛性相关的问题应回到 `workflows/ground-state/` 或 `workflows/phonon/` 的专门页面处理。
-
-## 后续完善重点
-
-- 补充该 workflow 的 output 段落定位说明。
-- 补充 PASS / WARN / BLOCK 判断的通用审阅表。
-- 补充与相邻 workflow 的数据依赖检查清单。
+- 依赖 Gamma phonon。
+- IR/Raman 和 polar phonon 分析会使用该分支。
+- phonon dispersion 中的 non-analytic correction 需要记录这些张量。
 
 ## 资料来源
 
 - QE INPUT_PH reference: <https://www.quantum-espresso.org/Doc/INPUT_PH.html>
-- QE INPUT_DYNMAT reference: <https://www.quantum-espresso.org/Doc/INPUT_DYNMAT.html>
+- QE PHonon user guide: <https://www.quantum-espresso.org/Doc/ph_user_guide/>
 - Kyoto phonon DokuWiki: <https://www2.yukawa.kyoto-u.ac.jp/~koudai.sugimoto/dokuwiki/doku.php?id=quantumespresso%3Aphonon%3A%E3%83%95%E3%82%A9%E3%83%8E%E3%83%B3%E3%81%AE%E8%A8%88%E7%AE%97>
+- Pranab Das phonon tutorial: <https://pranabdas.github.io/espresso/hands-on/phonon/>
+- QE INPUT_DYNMAT reference: <https://www.quantum-espresso.org/Doc/INPUT_DYNMAT.html>

@@ -1,63 +1,67 @@
-# Phonon debugging workflow
+# phonon debugging workflow
 
 ## 页面定位
 
 - 对应学习路线：[learn/06-phonon-dfpt-loop.md](../../learn/06-phonon-dfpt-loop.md)
-- 上游依赖：failed or suspicious phonon run
-- 下游用途：rerun policy / PASS-WARN-BLOCK decision
+- 上游依赖：failed or suspicious phonon workflow
+- 下游用途：rerun strategy and PASS / WARN / BLOCK decision
 - 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
 ## 计算目标
 
-针对 ph.x 不收敛、dyn 文件缺失、ASR 异常、negative frequency 和 LO-TO 分支问题建立排查顺序。
+按症状排查 phonon workflow：`ph.x` 不收敛、acoustic modes 不为零、negative frequency、q-grid 太粗、结构未充分优化、SCF threshold 太松、金属 smearing 和 2D 长程相互作用问题。
 
 ## 输入前提
 
-- `<structure>`、`<pseudo>`、`<system>` 和上游 workflow 已记录。
-- cutoff、k 点、occupation、收敛阈值和物理模型与本 workflow 目标一致。
-- 已明确本 workflow 的目标性质、准入条件和下游用途。
+- 结构已充分优化，并通过 SCF output review。
+- SCF 的 cutoff、k 点、smearing 和 `conv_thr` 已按 phonon 目标审阅。
+- 已明确该页是 Gamma phonon、q-grid、DOS、响应张量还是 debugging 分支。
 
 ## 计算图
 
 ```text
-<failed or suspicious phonon run>
-  -> ph.x, `q2r.x`, `matdyn.x`
-  -> <intermediate_state>
-  -> <reviewed_output>
+suspicious phonon output
+  -> identify symptom
+  -> check SCF / relax / ph.x / q2r.x / matdyn.x
+  -> decide PASS / WARN / BLOCK
+  -> rerun with isolated changed variable
 ```
 
 ## 需要的 QE 程序
 
-`ph.x`, `q2r.x`, `matdyn.x`
+`pw.x`、`ph.x`、`q2r.x`、`matdyn.x`、`dynmat.x`
 
 ## 通用输入模板
 
-```text
-<program>.<workflow>.<system>.in
-
-<namelist_or_cards>
-  calculation_or_task = 'phonon-debugging'
-  prefix = '<system>'
-  outdir = '<scratch_dir>'
-  <input_dependency> = '<upstream_output>'
-  <key_parameter> = <value>
+```fortran
+# Debugging is record-driven. Keep the original input/output unchanged.
+# Create a new run with one controlled change at a time:
+&INPUTPH
+  prefix = '<system_debug_run>',
+  outdir = '<fresh_scratch_dir>',
+  tr2_ph = <stricter_phonon_threshold>,
+  recover = .true.,
+  <same_q_point_or_q_grid> = <same_or_controlled_change>,
+/
 ```
 
 ## 输入字段说明
 
 | 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
-| `tr2_ph` | ph.x | 响应收敛阈值 | 只调 ph 阈值而不检查 SCF | perturbation convergence |
-| `recover` | ph.x | 恢复中断计算 | scratch 不完整导致假恢复 | restart/output 状态 |
-| `asr/zasr` | q2r.x/matdyn.x | 声学和规则处理 | 用 ASR 掩盖未收敛结构 | Gamma 声学支和频率变化 |
+| `tr2_ph` | ph.x | 响应收敛阈值 | 只调阈值不看 SCF | perturbation convergence |
+| `conv_thr` | pw.x | 上游 SCF 阈值 | SCF 太松进入 phonon | SCF estimated accuracy |
+| `forc_conv_thr` | pw.x relax | 结构残余力 | 未优化结构导致虚频 | relax output final forces |
+| `asr/zasr` | q2r.x/matdyn.x/dynmat.x | acoustic sum rule / ASR | 用 ASR 掩盖真实问题 | ASR 前后频率对比 |
+| `nq1/nq2/nq3` | ph.x | q-grid 尺寸 | 粗 q-grid 解释细节 | dyn 文件和插值结果 |
 
 ## 通用输出审阅模板
 
 ```markdown
-## Output Review
+## output review
 
-- Program:
-- Calculation type:
+- QE 程序:
+- 计算类型:
 - QE version:
 - Input dependency:
 - Structure summary:
@@ -65,7 +69,7 @@
 - Cutoff reported:
 - K-points reported:
 - Convergence status:
-- Main numerical result:
+- 本 workflow 关键输出:
 - Warnings:
 - Scratch / restart status:
 - PASS / WARN / BLOCK:
@@ -75,50 +79,51 @@
 
 ## 输出判断标准
 
-- 程序正常结束只代表执行完成；还需要检查关键输出、warning 和上游依赖是否一致。
-- 结果进入下游前，应能说明本 workflow 的目标量、数值设置和物理模型没有互相冲突。
-- PASS / WARN / BLOCK 判断必须引用 output 中的具体证据。
+- ph.x 不收敛先回查 SCF、smearing、mixing 和 perturbation 输出。
+- acoustic modes 不为零时比较 ASR 前后，并复查结构残余力。
+- negative frequency 要记录位置、大小、参数敏感性和是否稳定存在。
+- 2D 体系需检查真空、长程库仑和边界处理设置。
 
 ## 收敛性要求
 
-- 上游 SCF 或结构优化应满足本 workflow 的目标精度。
-- cutoff、k 点、smearing、q-grid 或高级模型参数需要围绕目标量检查敏感性。
-- 如果本页只是高级边界页，应记录哪些收敛测试必须在专门 workflow 中完成。
+- 每次 debug 只改变一个变量。
+- 新测试使用 fresh `prefix/outdir`，避免旧 scratch 污染。
+- PASS / WARN / BLOCK 应写明证据和下一步，不用单次粗结果定性稳定性。
 
 ## 常见错误与诊断
 
 | 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| 程序完成但结果不可解释 | 上游依赖、参数或物理模型记录不足 | 先核对 input、output header、scratch 和 record |
-| 下游读取失败 | `prefix/outdir`、文件前缀或中间文件不一致 | 检查文件名、路径和 output 中的读取信息 |
-| 数值趋势不稳定 | cutoff、k 点、smearing、q-grid 或模型参数未收敛 | 回到对应 convergence workflow |
+| ph.x 不收敛 | SCF 太松、smearing/mixing 不合适 | 先复查 SCF output 和 ph perturbation |
+| acoustic modes 不为零 | 结构残余力、ASR、cutoff/k 点问题 | 检查 relax、ASR 前后、收敛参数 |
+| negative frequency | 数值误差或真实不稳定 | 做参数和关键 q 点复查 |
+| q2r dyn 不全 | q-grid 未完成 | 检查 dyn 文件列表 |
+| 2D Gamma 附近异常 | 周期镜像或长程相互作用 | 检查真空和 2D 边界策略 |
 
 ## 通用学习模板
 
-使用 `<system>`、`<structure>`、`<pseudo>`、`<workflow>`、`<upstream_output>` 等占位符记录个人学习任务。本仓库只提供通用审阅框架，不保存具体计算结果。
+使用 `<system>`、`<q_grid>`、`<q_path>`、`<asr_scheme>`、`<phonon_threshold>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
 ## 记录模板
 
 ```text
-<program>.<workflow>.<system>.in
-<program>.<workflow>.<system>.out
+debug-notes.<system>.md
+original-inputs/
+controlled-rerun-inputs/
+controlled-rerun-outputs/
 record.md
 ```
 
 ## 与其他 workflow 的关系
 
-- 上游 workflow 决定本页输入是否可信。
-- 本页输出只有通过 output review 后才能进入下游。
-- 与收敛性相关的问题应回到 `workflows/ground-state/` 或 `workflows/phonon/` 的专门页面处理。
-
-## 后续完善重点
-
-- 补充该 workflow 的 output 段落定位说明。
-- 补充 PASS / WARN / BLOCK 判断的通用审阅表。
-- 补充与相邻 workflow 的数据依赖检查清单。
+- 服务 Gamma phonon、phonon dispersion、phonon DOS 和 dielectric/Born 分支。
+- SCF、relax 和 convergence 页面是 phonon debug 的上游。
 
 ## 资料来源
 
 - QE INPUT_PH reference: <https://www.quantum-espresso.org/Doc/INPUT_PH.html>
 - QE PHonon user guide: <https://www.quantum-espresso.org/Doc/ph_user_guide/>
 - Kyoto phonon DokuWiki: <https://www2.yukawa.kyoto-u.ac.jp/~koudai.sugimoto/dokuwiki/doku.php?id=quantumespresso%3Aphonon%3A%E3%83%95%E3%82%A9%E3%83%8E%E3%83%B3%E3%81%AE%E8%A8%88%E7%AE%97>
+- Pranab Das phonon tutorial: <https://pranabdas.github.io/espresso/hands-on/phonon/>
+- QE INPUT_Q2R reference: <https://www.quantum-espresso.org/Doc/INPUT_Q2R.html>
+- QE INPUT_MATDYN reference: <https://www.quantum-espresso.org/Doc/INPUT_MATDYN.html>

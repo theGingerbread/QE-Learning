@@ -4,60 +4,62 @@
 
 - 对应学习路线：[learn/05-electronic-structure-loop.md](../../learn/05-electronic-structure-loop.md)
 - 上游依赖：SCF -> NSCF on dense uniform k mesh
-- 下游用途：DOS plot / PDOS / Fermi-level analysis
+- 下游用途：total DOS plot and Fermi-level analysis
 - 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
 ## 计算目标
 
-从 dense k-mesh eigenvalues 计算总态密度，用于判断能隙、Fermi 附近态和电子结构整体分布。
+从 dense uniform k mesh 的 NSCF eigenvalues 计算 total density of states，判断能隙、Fermi 附近态和总体能量分布。
 
 ## 输入前提
 
-- `<structure>`、`<pseudo>`、`<system>` 和上游 workflow 已记录。
-- cutoff、k 点、occupation、收敛阈值和物理模型与本 workflow 目标一致。
-- 已明确本 workflow 的目标性质、准入条件和下游用途。
+- 上游 input、output、`record.md` 已可追溯。
+- `<system>`、`<structure>`、`<pseudo>`、cutoff、k 点和 occupation 设置已记录。
+- 已明确本 workflow 输出如何进入下游或图像解释。
 
 ## 计算图
 
 ```text
-<SCF -> NSCF on dense uniform k mesh>
+<structure> + <pseudo>
+  -> pw.x scf
+  -> pw.x nscf on <dense_k_mesh>
   -> dos.x
-  -> <intermediate_state>
-  -> <reviewed_output>
+  -> dos.<system>.dat
 ```
 
 ## 需要的 QE 程序
 
-`dos.x`
+`pw.x`、`dos.x`
 
 ## 通用输入模板
 
-```text
-<program>.<workflow>.<system>.in
-
-<namelist_or_cards>
-  calculation_or_task = 'dos'
-  prefix = '<system>'
-  outdir = '<scratch_dir>'
-  <input_dependency> = '<upstream_output>'
-  <key_parameter> = <value>
+```fortran
+&DOS
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  fildos = 'dos.<system>.dat',
+  Emin = <energy_min>,
+  Emax = <energy_max>,
+  DeltaE = <energy_step>,
+/
 ```
 
 ## 输入字段说明
 
 | 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
-| `prefix/outdir` | dos.x | 读取上游 NSCF 数据 | 读取错误 scratch 或旧数据 | dos.x output 显示读取路径 |
-| `fildos` | dos.x | DOS 输出文件 | 文件名无法追踪体系和参数 | 生成对应 DOS 数据文件 |
-| `Emin/Emax/DeltaE` | dos.x | 控制能量窗口和分辨率 | 窗口不覆盖目标能区 | 输出数据范围可检查 |
+| `prefix/outdir` | dos.x | 读取 NSCF 数据 | 读取 SCF 或旧 scratch | dos.x output 显示读取目录 |
+| `fildos` | dos.x | DOS 输出文件 | 文件名无法追溯 | 生成指定数据文件 |
+| `Emin/Emax` | dos.x | 能量窗口 | 没有覆盖目标能区 | DOS 文件能量范围 |
+| `DeltaE` | dos.x | 能量步长 | 过粗丢失结构或过细放大噪声 | DOS 文件步长 |
 
 ## 通用输出审阅模板
 
 ```markdown
-## Output Review
+## output review
 
-- Program:
-- Calculation type:
+- QE 程序:
+- 计算类型:
 - QE version:
 - Input dependency:
 - Structure summary:
@@ -65,7 +67,7 @@
 - Cutoff reported:
 - K-points reported:
 - Convergence status:
-- Main numerical result:
+- 本 workflow 关键输出:
 - Warnings:
 - Scratch / restart status:
 - PASS / WARN / BLOCK:
@@ -75,49 +77,48 @@
 
 ## 输出判断标准
 
-- 程序正常结束只代表执行完成；还需要检查关键输出、warning 和上游依赖是否一致。
-- 结果进入下游前，应能说明本 workflow 的目标量、数值设置和物理模型没有互相冲突。
-- PASS / WARN / BLOCK 判断必须引用 output 中的具体证据。
+- 确认 `dos.x` 读取的是目标 NSCF 数据。
+- 能量范围覆盖 VBM/CBM、Fermi 附近或关注能区。
+- DOS 金属性判断应与 bands 和 Fermi energy 一致。
+- 记录能量零点采用 Fermi energy、VBM 还是原始 QE 输出。
 
 ## 收敛性要求
 
-- 上游 SCF 或结构优化应满足本 workflow 的目标精度。
-- cutoff、k 点、smearing、q-grid 或高级模型参数需要围绕目标量检查敏感性。
-- 如果本页只是高级边界页，应记录哪些收敛测试必须在专门 workflow 中完成。
+- NSCF k mesh 通常要比 SCF 更密。
+- 金属 DOS 对 k mesh 和 smearing/broadening 敏感。
+- 能量步长应与目标能区分辨率匹配。
 
 ## 常见错误与诊断
 
 | 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| 程序完成但结果不可解释 | 上游依赖、参数或物理模型记录不足 | 先核对 input、output header、scratch 和 record |
-| 下游读取失败 | `prefix/outdir`、文件前缀或中间文件不一致 | 检查文件名、路径和 output 中的读取信息 |
-| 数值趋势不稳定 | cutoff、k 点、smearing、q-grid 或模型参数未收敛 | 回到对应 convergence workflow |
+| DOS 锯齿严重 | k mesh 太稀或 DeltaE 太小 | 加密 NSCF k mesh并调整 DeltaE |
+| DOS 与 bands 矛盾 | 能量零点或 k mesh 不一致 | 对齐 Fermi reference 并复查 bands |
+| dos.x 读不到数据 | prefix/outdir 不一致 | 核对 SCF/NSCF/dos.x 输入 |
 
 ## 通用学习模板
 
-使用 `<system>`、`<structure>`、`<pseudo>`、`<workflow>`、`<upstream_output>` 等占位符记录个人学习任务。本仓库只提供通用审阅框架，不保存具体计算结果。
+使用 `<system>`、`<structure>`、`<pseudo>`、`<k_mesh>`、`<energy_window>`、`<output_format>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
 ## 记录模板
 
 ```text
-<program>.<workflow>.<system>.in
-<program>.<workflow>.<system>.out
+pw.scf.<system>.in
+pw.nscf.<system>.in
+dos.<system>.in
+dos.<system>.out
+dos.<system>.dat
 record.md
 ```
 
 ## 与其他 workflow 的关系
 
-- 上游 workflow 决定本页输入是否可信。
-- 本页输出只有通过 output review 后才能进入下游。
-- 与收敛性相关的问题应回到 `workflows/ground-state/` 或 `workflows/phonon/` 的专门页面处理。
-
-## 后续完善重点
-
-- 补充该 workflow 的 output 段落定位说明。
-- 补充 PASS / WARN / BLOCK 判断的通用审阅表。
-- 补充与相邻 workflow 的数据依赖检查清单。
+- 依赖 NSCF dense k mesh。
+- PDOS 应与 total DOS 对照。
+- Fermi surface 需要更密且适合金属的 NSCF 数据。
 
 ## 资料来源
 
-- QE DOS input reference: <https://www.quantum-espresso.org/Doc/INPUT_DOS.html>
+- QE INPUT_DOS reference: <https://www.quantum-espresso.org/Doc/INPUT_DOS.html>
+- QE INPUT_PW reference: <https://www.quantum-espresso.org/Doc/INPUT_PW.html>
 - Pranab Das QE tutorial: <https://pranabdas.github.io/espresso/>

@@ -3,27 +3,27 @@
 ## 页面定位
 
 - 对应学习路线：[learn/07-postprocessing-loop.md](../../learn/07-postprocessing-loop.md)
-- 上游依赖：SCF ground state
-- 下游用途：visualization / bonding / density difference
+- 上游依赖：SCF ground-state density
+- 下游用途：charge density data and visualization
 - 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
 ## 计算目标
 
-从 SCF ground state 提取电荷密度或相关实空间数据，用于可视化和定性分析。
+用 `pp.x` 从 SCF ground state 提取 charge density 网格数据，用于可视化、电荷差分或后续定性分析。
 
 ## 输入前提
 
-- `<structure>`、`<pseudo>`、`<system>` 和上游 workflow 已记录。
-- cutoff、k 点、occupation、收敛阈值和物理模型与本 workflow 目标一致。
-- 已明确本 workflow 的目标性质、准入条件和下游用途。
+- 上游 input、output、`record.md` 已可追溯。
+- `<system>`、`<structure>`、`<pseudo>`、cutoff、k 点和 occupation 设置已记录。
+- 已明确本 workflow 输出如何进入下游或图像解释。
 
 ## 计算图
 
 ```text
-<SCF ground state>
-  -> pp.x
-  -> <intermediate_state>
-  -> <reviewed_output>
+pw.x scf
+  -> pp.x with charge-density plot_num
+  -> <charge_density_file>
+  -> visualization / analysis
 ```
 
 ## 需要的 QE 程序
@@ -32,32 +32,36 @@
 
 ## 通用输入模板
 
-```text
-<program>.<workflow>.<system>.in
-
-<namelist_or_cards>
-  calculation_or_task = 'charge-density'
-  prefix = '<system>'
-  outdir = '<scratch_dir>'
-  <input_dependency> = '<upstream_output>'
-  <key_parameter> = <value>
+```fortran
+&INPUTPP
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  plot_num = <charge_density_plot_num>,
+  filplot = 'charge-density.<system>.dat',
+/
+&PLOT
+  iflag = <plot_dimension>,
+  output_format = <output_format>,
+  fileout = 'charge-density.<system>.<format>',
+/
 ```
 
 ## 输入字段说明
 
 | 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
-| `plot_num` | pp.x | 选择输出物理量 | 未核对 plot_num 含义 | pp.x output 和生成文件类型 |
-| `prefix/outdir` | pp.x | 读取 SCF 数据 | 读取旧 scratch | output 显示读取路径 |
-| `iflag/output_format` | pp.x | 控制维度和输出格式 | 格式与可视化工具不匹配 | 生成文件后缀和内容 |
+| `plot_num` | pp.x | 选择 charge density 等输出量 | 未核对 plot_num 含义 | pp.x output 和生成文件 |
+| `filplot` | pp.x | 中间 plot 文件 | 文件覆盖或来源不明 | 生成 filplot |
+| `iflag` | pp.x / &PLOT | 选择 1D/2D/3D 输出 | 维度与分析目标不符 | 输出网格维度 |
+| `output_format` | pp.x / &PLOT | 选择可视化格式 | 目标软件无法读取 | 生成 fileout |
 
 ## 通用输出审阅模板
 
 ```markdown
-## Output Review
+## output review
 
-- Program:
-- Calculation type:
+- QE 程序:
+- 计算类型:
 - QE version:
 - Input dependency:
 - Structure summary:
@@ -65,7 +69,7 @@
 - Cutoff reported:
 - K-points reported:
 - Convergence status:
-- Main numerical result:
+- 本 workflow 关键输出:
 - Warnings:
 - Scratch / restart status:
 - PASS / WARN / BLOCK:
@@ -75,47 +79,43 @@
 
 ## 输出判断标准
 
-- 程序正常结束只代表执行完成；还需要检查关键输出、warning 和上游依赖是否一致。
-- 结果进入下游前，应能说明本 workflow 的目标量、数值设置和物理模型没有互相冲突。
-- PASS / WARN / BLOCK 判断必须引用 output 中的具体证据。
+- 确认读取的是目标 SCF `prefix/outdir`。
+- 输出格式和网格维度符合可视化或分析目标。
+- 图像解释必须回到 SCF input/output，不能脱离收敛性。
 
 ## 收敛性要求
 
-- 上游 SCF 或结构优化应满足本 workflow 的目标精度。
-- cutoff、k 点、smearing、q-grid 或高级模型参数需要围绕目标量检查敏感性。
-- 如果本页只是高级边界页，应记录哪些收敛测试必须在专门 workflow 中完成。
+- charge density 依赖 SCF 收敛质量。
+- 网格分辨率受 FFT grid 和 cutoff 影响。
+- 电荷差分需要多次计算的结构、网格和参考一致。
 
 ## 常见错误与诊断
 
 | 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| 程序完成但结果不可解释 | 上游依赖、参数或物理模型记录不足 | 先核对 input、output header、scratch 和 record |
-| 下游读取失败 | `prefix/outdir`、文件前缀或中间文件不一致 | 检查文件名、路径和 output 中的读取信息 |
-| 数值趋势不稳定 | cutoff、k 点、smearing、q-grid 或模型参数未收敛 | 回到对应 convergence workflow |
+| 图像为空或格式错误 | output_format/iflag 不适配 | 检查 pp.x &PLOT 设置 |
+| 读取旧密度 | prefix/outdir 混用 | 核对 pp.x output |
+| 电荷差分不可比 | 网格或结构不一致 | 统一 cell 和 FFT/grid 设置 |
 
 ## 通用学习模板
 
-使用 `<system>`、`<structure>`、`<pseudo>`、`<workflow>`、`<upstream_output>` 等占位符记录个人学习任务。本仓库只提供通用审阅框架，不保存具体计算结果。
+使用 `<system>`、`<structure>`、`<pseudo>`、`<k_mesh>`、`<energy_window>`、`<output_format>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
 ## 记录模板
 
 ```text
-<program>.<workflow>.<system>.in
-<program>.<workflow>.<system>.out
+pw.scf.<system>.out
+pp.density.<system>.in
+pp.density.<system>.out
+charge-density.<system>.<format>
 record.md
 ```
 
 ## 与其他 workflow 的关系
 
-- 上游 workflow 决定本页输入是否可信。
-- 本页输出只有通过 output review 后才能进入下游。
-- 与收敛性相关的问题应回到 `workflows/ground-state/` 或 `workflows/phonon/` 的专门页面处理。
-
-## 后续完善重点
-
-- 补充该 workflow 的 output 段落定位说明。
-- 补充 PASS / WARN / BLOCK 判断的通用审阅表。
-- 补充与相邻 workflow 的数据依赖检查清单。
+- 依赖 SCF。
+- 与 ELF、electrostatic potential 同属 pp.x 后处理。
+- 可视化工具只辅助审阅。
 
 ## 资料来源
 

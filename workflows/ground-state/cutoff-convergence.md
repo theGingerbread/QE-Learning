@@ -3,27 +3,27 @@
 ## 页面定位
 
 - 对应学习路线：[learn/03-convergence-loop.md](../../learn/03-convergence-loop.md)
-- 上游依赖：<structure> + <pseudo> + baseline SCF input
-- 下游用途：SCF / relax / bands / DOS / phonon parameter policy
+- 上游依赖：checked structure, pseudo, baseline SCF input
+- 下游用途：cutoff policy for SCF, relax, bands, DOS, phonon
 - 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
 ## 计算目标
 
-评估 `<ecutwfc>` 和 `<ecutrho>` 对总能、力、应力或目标性质的影响，确定后续 workflow 可使用的 cutoff 策略。
+评估 `ecutwfc` 与 `ecutrho` 对目标量的影响，建立后续 workflow 可复用的 cutoff 策略。
 
 ## 输入前提
 
-- `<structure>`、`<pseudo>`、`<system>` 和上游 workflow 已记录。
-- cutoff、k 点、occupation、收敛阈值和物理模型与本 workflow 目标一致。
-- 已明确本 workflow 的目标性质、准入条件和下游用途。
+- `<structure>`、`<pseudo>` 和 `<system>` 已记录。
+- SCF 基础参数与本 workflow 目标一致。
+- 已明确输出是否允许进入下游 workflow。
 
 ## 计算图
 
 ```text
-<<structure> + <pseudo> + baseline SCF input>
-  -> pw.x
-  -> <intermediate_state>
-  -> <reviewed_output>
+<structure> + <pseudo> + fixed k mesh
+  -> pw.x scf with ecutwfc/ecutrho scan
+  -> convergence table
+  -> cutoff policy for downstream workflow
 ```
 
 ## 需要的 QE 程序
@@ -32,32 +32,52 @@
 
 ## 通用输入模板
 
-```text
-<program>.<workflow>.<system>.in
-
-<namelist_or_cards>
-  calculation_or_task = 'scf'
-  prefix = '<system>'
-  outdir = '<scratch_dir>'
-  <input_dependency> = '<upstream_output>'
-  <key_parameter> = <value>
+```fortran
+&CONTROL
+  calculation = 'scf',
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  pseudo_dir = '<pseudo_dir>',
+/
+&SYSTEM
+  ibrav = 0,
+  nat = <number_of_atoms>,
+  ntyp = <number_of_species>,
+  ecutwfc = <wavefunction_cutoff>,
+  ecutrho = <charge_density_cutoff>,
+  occupations = '<occupation_scheme>',
+/
+&ELECTRONS
+  conv_thr = <scf_threshold>,
+/
+ATOMIC_SPECIES
+  <Element> <Mass> <Pseudo.UPF>
+ATOMIC_POSITIONS <coordinate_type>
+  <Element> <x> <y> <z>
+K_POINTS automatic
+  <nk1> <nk2> <nk3> <sk1> <sk2> <sk3>
+CELL_PARAMETERS <unit>
+  <a1x> <a1y> <a1z>
+  <a2x> <a2y> <a2z>
+  <a3x> <a3y> <a3z>
 ```
 
 ## 输入字段说明
 
 | 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
-| `ecutwfc` | pw.x | 波函数平面波 kinetic-energy cutoff | 只采用赝势建议值而不验证目标性质 | output 显示 kinetic-energy cutoff |
-| `ecutrho` | pw.x | 电荷密度和势的 cutoff | 对 USPP/PAW 设置过低 | output 显示 charge density cutoff |
-| `pseudo type` | pw.x | 影响 `ecutrho/ecutwfc` 的合理比例 | 混用不同来源赝势时直接复用旧 cutoff | output 中赝势段落显示类型 |
+| `ecutwfc` | pw.x | 波函数平面波 cutoff | 只看单点结果，不做 scan | output 显示 kinetic-energy cutoff |
+| `ecutrho` | pw.x | 电荷密度和势 cutoff | USPP/PAW 设置过低 | output 显示 charge density cutoff |
+| `ATOMIC_SPECIES` | pw.x | 赝势类型影响 cutoff 需求 | 换赝势后沿用旧 cutoff | output 中 pseudopotential type |
+| `K_POINTS` | pw.x | cutoff scan 中应固定 k mesh | 同时改 cutoff 和 k mesh | output 中 k 点数量一致 |
 
 ## 通用输出审阅模板
 
 ```markdown
-## Output Review
+## output review
 
-- Program:
-- Calculation type:
+- QE 程序:
+- 计算类型:
 - QE version:
 - Input dependency:
 - Structure summary:
@@ -65,7 +85,7 @@
 - Cutoff reported:
 - K-points reported:
 - Convergence status:
-- Main numerical result:
+- 本 workflow 关键输出:
 - Warnings:
 - Scratch / restart status:
 - PASS / WARN / BLOCK:
@@ -75,47 +95,42 @@
 
 ## 输出判断标准
 
-- 程序正常结束只代表执行完成；还需要检查关键输出、warning 和上游依赖是否一致。
-- 结果进入下游前，应能说明本 workflow 的目标量、数值设置和物理模型没有互相冲突。
-- PASS / WARN / BLOCK 判断必须引用 output 中的具体证据。
+- 每个 scan 点都应确认 SCF 已收敛。
+- 记录 total energy、force、stress、band gap 或 phonon frequency 等目标量。
+- PASS 需要目标量变化低于自定准则；WARN 表示可探索但不足以下游定稿；BLOCK 表示需继续加大 cutoff 或更换策略。
 
 ## 收敛性要求
 
-- 上游 SCF 或结构优化应满足本 workflow 的目标精度。
-- cutoff、k 点、smearing、q-grid 或高级模型参数需要围绕目标量检查敏感性。
-- 如果本页只是高级边界页，应记录哪些收敛测试必须在专门 workflow 中完成。
+- 固定结构、赝势、k mesh、smearing，只改变 cutoff 变量。
+- NC、USPP、PAW 对 `ecutrho` 敏感性不同，需按赝势类型记录。
+- phonon、stress、force 任务通常比单纯总能更敏感。
 
 ## 常见错误与诊断
 
 | 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| 程序完成但结果不可解释 | 上游依赖、参数或物理模型记录不足 | 先核对 input、output header、scratch 和 record |
-| 下游读取失败 | `prefix/outdir`、文件前缀或中间文件不一致 | 检查文件名、路径和 output 中的读取信息 |
-| 数值趋势不稳定 | cutoff、k 点、smearing、q-grid 或模型参数未收敛 | 回到对应 convergence workflow |
+| 总能收敛但力不稳定 | 只用 total energy 判断 | 加入 force/stress 目标量 |
+| 换赝势后结果漂移 | cutoff policy 未重做 | 从最低 cutoff 重新扫描 |
+| phonon 前出现虚频 | cutoff/ecutrho 或结构未足够严格 | 提高 cutoff 并复查 SCF/relax |
 
 ## 通用学习模板
 
-使用 `<system>`、`<structure>`、`<pseudo>`、`<workflow>`、`<upstream_output>` 等占位符记录个人学习任务。本仓库只提供通用审阅框架，不保存具体计算结果。
+使用 `<system>`、`<structure>`、`<pseudo>`、`<k_mesh>`、`<ecutwfc>`、`<ecutrho>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
 ## 记录模板
 
 ```text
-<program>.<workflow>.<system>.in
-<program>.<workflow>.<system>.out
+pw.scf.<system>.ecut<value>.in
+pw.scf.<system>.ecut<value>.out
+cutoff-convergence.<system>.md
 record.md
 ```
 
 ## 与其他 workflow 的关系
 
-- 上游 workflow 决定本页输入是否可信。
-- 本页输出只有通过 output review 后才能进入下游。
-- 与收敛性相关的问题应回到 `workflows/ground-state/` 或 `workflows/phonon/` 的专门页面处理。
-
-## 后续完善重点
-
-- 补充该 workflow 的 output 段落定位说明。
-- 补充 PASS / WARN / BLOCK 判断的通用审阅表。
-- 补充与相邻 workflow 的数据依赖检查清单。
+- SCF 使用 cutoff policy。
+- relax/vc-relax 应使用通过力/应力审阅的 cutoff。
+- phonon 前应复查 cutoff 对频率的影响。
 
 ## 资料来源
 

@@ -137,8 +137,8 @@ CELL_PARAMETERS <unit>
 ```markdown
 ## Output Review
 
-- Program:
-- Calculation type:
+- QE 程序:
+- 计算类型:
 - QE version:
 - SCF dependency:
 - `prefix/outdir` consistency:

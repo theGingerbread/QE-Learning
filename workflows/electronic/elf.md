@@ -3,27 +3,27 @@
 ## 页面定位
 
 - 对应学习路线：[learn/07-postprocessing-loop.md](../../learn/07-postprocessing-loop.md)
-- 上游依赖：SCF ground state with suitable density
-- 下游用途：ELF visualization / bonding interpretation
+- 上游依赖：SCF ground-state density
+- 下游用途：ELF grid and visualization
 - 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
 ## 计算目标
 
-生成 electron localization function 数据，用于辅助判断电子局域化和成键特征。
+用 `pp.x` 输出 electron localization function，用于辅助判断电子局域化和成键特征。ELF 是可视化/定性分析工具，不应被直接当作定量键强度。
 
 ## 输入前提
 
-- `<structure>`、`<pseudo>`、`<system>` 和上游 workflow 已记录。
-- cutoff、k 点、occupation、收敛阈值和物理模型与本 workflow 目标一致。
-- 已明确本 workflow 的目标性质、准入条件和下游用途。
+- 上游 input、output、`record.md` 已可追溯。
+- `<system>`、`<structure>`、`<pseudo>`、cutoff、k 点和 occupation 设置已记录。
+- 已明确本 workflow 输出如何进入下游或图像解释。
 
 ## 计算图
 
 ```text
-<SCF ground state with suitable density>
-  -> pp.x
-  -> <intermediate_state>
-  -> <reviewed_output>
+pw.x scf
+  -> pp.x ELF plot_num
+  -> ELF grid file
+  -> visualization
 ```
 
 ## 需要的 QE 程序
@@ -32,32 +32,36 @@
 
 ## 通用输入模板
 
-```text
-<program>.<workflow>.<system>.in
-
-<namelist_or_cards>
-  calculation_or_task = 'elf'
-  prefix = '<system>'
-  outdir = '<scratch_dir>'
-  <input_dependency> = '<upstream_output>'
-  <key_parameter> = <value>
+```fortran
+&INPUTPP
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  plot_num = <elf_plot_num>,
+  filplot = 'elf.<system>.dat',
+/
+&PLOT
+  iflag = 3,
+  output_format = <output_format>,
+  fileout = 'elf.<system>.<format>',
+/
 ```
 
 ## 输入字段说明
 
 | 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
-| `plot_num` | pp.x | 选择 ELF 输出 | 未核对官方 plot_num | pp.x output 和生成文件 |
-| `prefix/outdir` | pp.x | 读取 SCF 数据 | 使用未收敛密度 | output 显示读取状态 |
-| `output_format` | pp.x | 选择可视化格式 | 格式无法被目标软件读取 | 生成文件可打开 |
+| `plot_num` | pp.x | 选择 ELF 输出 | 未核对官方 plot_num | pp.x output |
+| `iflag` | pp.x / &PLOT | 输出维度 | 只输出切片却解释整体空间 | 输出网格维度 |
+| `output_format` | pp.x / &PLOT | 可视化格式 | 格式不被工具支持 | 生成文件 |
+| `prefix/outdir` | pp.x | 读取 SCF 密度 | 未收敛或旧密度 | pp.x output |
 
 ## 通用输出审阅模板
 
 ```markdown
-## Output Review
+## output review
 
-- Program:
-- Calculation type:
+- QE 程序:
+- 计算类型:
 - QE version:
 - Input dependency:
 - Structure summary:
@@ -65,7 +69,7 @@
 - Cutoff reported:
 - K-points reported:
 - Convergence status:
-- Main numerical result:
+- 本 workflow 关键输出:
 - Warnings:
 - Scratch / restart status:
 - PASS / WARN / BLOCK:
@@ -75,47 +79,41 @@
 
 ## 输出判断标准
 
-- 程序正常结束只代表执行完成；还需要检查关键输出、warning 和上游依赖是否一致。
-- 结果进入下游前，应能说明本 workflow 的目标量、数值设置和物理模型没有互相冲突。
-- PASS / WARN / BLOCK 判断必须引用 output 中的具体证据。
+- 确认 ELF 文件来自目标 SCF。
+- 可视化前记录等值面、切片方向和单位。
+- ELF 解释应结合 charge density、PDOS 或结构信息。
 
 ## 收敛性要求
 
-- 上游 SCF 或结构优化应满足本 workflow 的目标精度。
-- cutoff、k 点、smearing、q-grid 或高级模型参数需要围绕目标量检查敏感性。
-- 如果本页只是高级边界页，应记录哪些收敛测试必须在专门 workflow 中完成。
+- ELF 对 SCF 密度质量和网格分辨率敏感。
+- 不同可视化等值面不能直接比较为定量键强度。
 
 ## 常见错误与诊断
 
 | 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| 程序完成但结果不可解释 | 上游依赖、参数或物理模型记录不足 | 先核对 input、output header、scratch 和 record |
-| 下游读取失败 | `prefix/outdir`、文件前缀或中间文件不一致 | 检查文件名、路径和 output 中的读取信息 |
-| 数值趋势不稳定 | cutoff、k 点、smearing、q-grid 或模型参数未收敛 | 回到对应 convergence workflow |
+| ELF 图像异常 | plot_num 或输出格式错误 | 核对 INPUT_PP |
+| 解释过度 | 把 ELF 当定量键级 | 回到 PDOS/charge density 对照 |
+| 不同体系图不可比 | 等值面/色标/网格不同 | 统一可视化设置并记录 |
 
 ## 通用学习模板
 
-使用 `<system>`、`<structure>`、`<pseudo>`、`<workflow>`、`<upstream_output>` 等占位符记录个人学习任务。本仓库只提供通用审阅框架，不保存具体计算结果。
+使用 `<system>`、`<structure>`、`<pseudo>`、`<k_mesh>`、`<energy_window>`、`<output_format>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
 ## 记录模板
 
 ```text
-<program>.<workflow>.<system>.in
-<program>.<workflow>.<system>.out
+pw.scf.<system>.out
+pp.elf.<system>.in
+pp.elf.<system>.out
+elf.<system>.<format>
 record.md
 ```
 
 ## 与其他 workflow 的关系
 
-- 上游 workflow 决定本页输入是否可信。
-- 本页输出只有通过 output review 后才能进入下游。
-- 与收敛性相关的问题应回到 `workflows/ground-state/` 或 `workflows/phonon/` 的专门页面处理。
-
-## 后续完善重点
-
-- 补充该 workflow 的 output 段落定位说明。
-- 补充 PASS / WARN / BLOCK 判断的通用审阅表。
-- 补充与相邻 workflow 的数据依赖检查清单。
+- 依赖 SCF。
+- 与 charge density、PDOS 配合解释电子局域化。
 
 ## 资料来源
 

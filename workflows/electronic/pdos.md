@@ -3,61 +3,63 @@
 ## 页面定位
 
 - 对应学习路线：[learn/05-electronic-structure-loop.md](../../learn/05-electronic-structure-loop.md)
-- 上游依赖：SCF -> NSCF with suitable projections
-- 下游用途：orbital / atomic projection analysis
+- 上游依赖：SCF -> NSCF with wavefunctions
+- 下游用途：orbital and atomic projected density of states
 - 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
 ## 计算目标
 
-把电子态投影到原子和轨道通道，分析态密度中的元素、轨道或磁性贡献。
+用 `projwfc.x` 将电子态投影到原子和轨道通道，分析元素/轨道贡献，并与 total DOS 对照。
 
 ## 输入前提
 
-- `<structure>`、`<pseudo>`、`<system>` 和上游 workflow 已记录。
-- cutoff、k 点、occupation、收敛阈值和物理模型与本 workflow 目标一致。
-- 已明确本 workflow 的目标性质、准入条件和下游用途。
+- 上游 input、output、`record.md` 已可追溯。
+- `<system>`、`<structure>`、`<pseudo>`、cutoff、k 点和 occupation 设置已记录。
+- 已明确本 workflow 输出如何进入下游或图像解释。
 
 ## 计算图
 
 ```text
-<SCF -> NSCF with suitable projections>
+<structure> + <pseudo>
+  -> pw.x scf
+  -> pw.x nscf
   -> projwfc.x
-  -> <intermediate_state>
-  -> <reviewed_output>
+  -> pdos files by atom/orbital
 ```
 
 ## 需要的 QE 程序
 
-`projwfc.x`
+`pw.x`、`projwfc.x`
 
 ## 通用输入模板
 
-```text
-<program>.<workflow>.<system>.in
-
-<namelist_or_cards>
-  calculation_or_task = 'pdos'
-  prefix = '<system>'
-  outdir = '<scratch_dir>'
-  <input_dependency> = '<upstream_output>'
-  <key_parameter> = <value>
+```fortran
+&PROJWFC
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  filpdos = 'pdos.<system>',
+  Emin = <energy_min>,
+  Emax = <energy_max>,
+  DeltaE = <energy_step>,
+/
 ```
 
 ## 输入字段说明
 
 | 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
-| `prefix/outdir` | projwfc.x | 读取上游波函数/电荷信息 | NSCF 数据不完整 | projwfc.x output 显示读取状态 |
-| `DeltaE` | projwfc.x | PDOS 能量分辨率 | 分辨率过粗或过细导致解释失真 | 输出 PDOS 文件能量步长 |
-| `filpdos` | projwfc.x | 输出文件前缀 | 文件名不记录设置 | 生成分通道 PDOS 文件 |
+| `prefix/outdir` | projwfc.x | 读取 NSCF wavefunctions | NSCF 数据不完整 | output 显示读取状态 |
+| `filpdos` | projwfc.x | PDOS 文件前缀 | 无法追踪参数 | 生成分通道文件 |
+| `Emin/Emax/DeltaE` | projwfc.x | 能量窗口和步长 | 与 total DOS 不一致 | PDOS 文件范围 |
+| `atomic labels` | projwfc.x output | 投影通道标识 | 轨道解释与赝势不一致 | output 中 state labels |
 
 ## 通用输出审阅模板
 
 ```markdown
-## Output Review
+## output review
 
-- Program:
-- Calculation type:
+- QE 程序:
+- 计算类型:
 - QE version:
 - Input dependency:
 - Structure summary:
@@ -65,7 +67,7 @@
 - Cutoff reported:
 - K-points reported:
 - Convergence status:
-- Main numerical result:
+- 本 workflow 关键输出:
 - Warnings:
 - Scratch / restart status:
 - PASS / WARN / BLOCK:
@@ -75,49 +77,47 @@
 
 ## 输出判断标准
 
-- 程序正常结束只代表执行完成；还需要检查关键输出、warning 和上游依赖是否一致。
-- 结果进入下游前，应能说明本 workflow 的目标量、数值设置和物理模型没有互相冲突。
-- PASS / WARN / BLOCK 判断必须引用 output 中的具体证据。
+- projection 文件是否完整生成。
+- 轨道标签、原子序号和赝势通道是否一致。
+- total DOS 与 PDOS 求和趋势应能互相对照，但投影不是严格完备性的保证。
+- Lowdin charge 可作辅助信息，不应直接当作唯一价态证据。
 
 ## 收敛性要求
 
-- 上游 SCF 或结构优化应满足本 workflow 的目标精度。
-- cutoff、k 点、smearing、q-grid 或高级模型参数需要围绕目标量检查敏感性。
-- 如果本页只是高级边界页，应记录哪些收敛测试必须在专门 workflow 中完成。
+- NSCF 需保留 wavefunctions。
+- PDOS 对 `nbnd`、能量窗口、k mesh 和 smearing 敏感。
+- 轨道解释要结合赝势投影通道。
 
 ## 常见错误与诊断
 
 | 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| 程序完成但结果不可解释 | 上游依赖、参数或物理模型记录不足 | 先核对 input、output header、scratch 和 record |
-| 下游读取失败 | `prefix/outdir`、文件前缀或中间文件不一致 | 检查文件名、路径和 output 中的读取信息 |
-| 数值趋势不稳定 | cutoff、k 点、smearing、q-grid 或模型参数未收敛 | 回到对应 convergence workflow |
+| PDOS 文件缺失 | NSCF wavefunctions 不完整或 prefix 错误 | 检查 outdir 和 disk IO |
+| 轨道标签误读 | 未核对 projwfc output labels | 以 output 标签为准 |
+| PDOS 与 total DOS 差异大 | 投影通道、能量窗口或 broadening 不一致 | 对照 total DOS 设置 |
 
 ## 通用学习模板
 
-使用 `<system>`、`<structure>`、`<pseudo>`、`<workflow>`、`<upstream_output>` 等占位符记录个人学习任务。本仓库只提供通用审阅框架，不保存具体计算结果。
+使用 `<system>`、`<structure>`、`<pseudo>`、`<k_mesh>`、`<energy_window>`、`<output_format>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
 ## 记录模板
 
 ```text
-<program>.<workflow>.<system>.in
-<program>.<workflow>.<system>.out
+pw.scf.<system>.in
+pw.nscf.<system>.in
+projwfc.<system>.in
+projwfc.<system>.out
+pdos.<system>*
 record.md
 ```
 
 ## 与其他 workflow 的关系
 
-- 上游 workflow 决定本页输入是否可信。
-- 本页输出只有通过 output review 后才能进入下游。
-- 与收敛性相关的问题应回到 `workflows/ground-state/` 或 `workflows/phonon/` 的专门页面处理。
-
-## 后续完善重点
-
-- 补充该 workflow 的 output 段落定位说明。
-- 补充 PASS / WARN / BLOCK 判断的通用审阅表。
-- 补充与相邻 workflow 的数据依赖检查清单。
+- 依赖 NSCF。
+- 与 DOS 配合解释态密度来源。
+- 与 Wannier 投影选择有概念联系，但目标不同。
 
 ## 资料来源
 
-- QE PROJWFC input reference: <https://www.quantum-espresso.org/Doc/INPUT_PROJWFC.html>
-- Pranab Das QE tutorial: <https://pranabdas.github.io/espresso/>
+- QE INPUT_PROJWFC reference: <https://www.quantum-espresso.org/Doc/INPUT_PROJWFC.html>
+- QE INPUT_DOS reference: <https://www.quantum-espresso.org/Doc/INPUT_DOS.html>

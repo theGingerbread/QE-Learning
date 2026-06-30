@@ -1,63 +1,80 @@
-# Work function workflow
+# Work-function workflow
 
 ## 页面定位
 
 - 对应学习路线：[learn/07-postprocessing-loop.md](../../learn/07-postprocessing-loop.md)
-- 上游依赖：slab SCF + electrostatic potential profile
-- 下游用途：surface work-function interpretation
+- 上游依赖：slab SCF and electrostatic potential profile
+- 下游用途：surface work-function estimate
 - 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
 ## 计算目标
 
-通过真空电势平台与 Fermi energy 的差值分析表面功函数，并记录 slab、真空和偶极修正等前提。
+从 slab 的方向平均电势中确定 vacuum level，并与 Fermi level 组合计算 work function。结构构建细节不展开，本页只说明 QE 输入和 output review 要求。
 
 ## 输入前提
 
-- `<structure>`、`<pseudo>`、`<system>` 和上游 workflow 已记录。
-- cutoff、k 点、occupation、收敛阈值和物理模型与本 workflow 目标一致。
-- 已明确本 workflow 的目标性质、准入条件和下游用途。
+- 上游 input、output、`record.md` 已可追溯。
+- `<system>`、`<structure>`、`<pseudo>`、cutoff、k 点和 occupation 设置已记录。
+- 已明确本 workflow 输出如何进入下游或图像解释。
 
 ## 计算图
 
 ```text
-<slab SCF + electrostatic potential profile>
-  -> pp.x, `average.x`
-  -> <intermediate_state>
-  -> <reviewed_output>
+slab-like <structure>
+  -> pw.x scf
+  -> pp.x potential
+  -> average.x profile
+  -> vacuum level - Fermi energy
 ```
 
 ## 需要的 QE 程序
 
-`pp.x`, `average.x`
+`pw.x`、`pp.x`、`average.x`
 
 ## 通用输入模板
 
-```text
-<program>.<workflow>.<system>.in
+```fortran
+# SCF requires a slab-like structure already prepared.
+&CONTROL
+  calculation = 'scf',
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  pseudo_dir = '<pseudo_dir>',
+/
+&SYSTEM
+  ibrav = 0,
+  nat = <number_of_atoms>,
+  ntyp = <number_of_species>,
+  ecutwfc = <wavefunction_cutoff>,
+  ecutrho = <charge_density_cutoff>,
+  occupations = '<occupation_scheme>',
+/
 
-<namelist_or_cards>
-  calculation_or_task = 'work-function'
-  prefix = '<system>'
-  outdir = '<scratch_dir>'
-  <input_dependency> = '<upstream_output>'
-  <key_parameter> = <value>
+# Then extract potential with pp.x and average.x.
+&INPUTPP
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  plot_num = <potential_plot_num>,
+  filplot = 'potential.<system>.dat',
+/
 ```
 
 ## 输入字段说明
 
 | 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
-| `assume_isolated / dipfield` | pw.x | 控制低维边界和偶极修正选项 | 未记录 slab 边界处理 | pw.x output 显示相关设置 |
-| `plot_num` | pp.x | 提取势相关数据 | 提取量与功函数定义不匹配 | pp.x output |
-| `idir` | average.x | 沿表面法向平均电势 | 平均方向错误 | profile 中是否有真空平台 |
+| `Fermi energy` | pw.x output | work function 的电子能级参考 | 没有记录能量零点 | SCF output 中 Fermi energy |
+| `plot_num` | pp.x | 提取势相关量 | 势类型选择错误 | pp.x output |
+| `idir` | average.x | 沿 slab 法向平均 | 方向错误 | average profile |
+| `assume_isolated/dipole options` | pw.x | 低维边界和偶极修正相关设置 | 未记录 slab 边界处理 | pw.x output |
 
 ## 通用输出审阅模板
 
 ```markdown
-## Output Review
+## output review
 
-- Program:
-- Calculation type:
+- QE 程序:
+- 计算类型:
 - QE version:
 - Input dependency:
 - Structure summary:
@@ -65,7 +82,7 @@
 - Cutoff reported:
 - K-points reported:
 - Convergence status:
-- Main numerical result:
+- 本 workflow 关键输出:
 - Warnings:
 - Scratch / restart status:
 - PASS / WARN / BLOCK:
@@ -75,49 +92,46 @@
 
 ## 输出判断标准
 
-- 程序正常结束只代表执行完成；还需要检查关键输出、warning 和上游依赖是否一致。
-- 结果进入下游前，应能说明本 workflow 的目标量、数值设置和物理模型没有互相冲突。
-- PASS / WARN / BLOCK 判断必须引用 output 中的具体证据。
+- profile 中应有可识别的 vacuum plateau。
+- work function expression 和能量零点必须写入 record。
+- 检查 vacuum thickness、dipole correction、slab 厚度和 k mesh 是否影响结果。
 
 ## 收敛性要求
 
-- 上游 SCF 或结构优化应满足本 workflow 的目标精度。
-- cutoff、k 点、smearing、q-grid 或高级模型参数需要围绕目标量检查敏感性。
-- 如果本页只是高级边界页，应记录哪些收敛测试必须在专门 workflow 中完成。
+- vacuum level 需要随真空厚度和 slab 设置复查。
+- Fermi level 来自同一 SCF，不应混用不同计算。
+- 低维边界和偶极修正设置需要记录。
 
 ## 常见错误与诊断
 
 | 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| 程序完成但结果不可解释 | 上游依赖、参数或物理模型记录不足 | 先核对 input、output header、scratch 和 record |
-| 下游读取失败 | `prefix/outdir`、文件前缀或中间文件不一致 | 检查文件名、路径和 output 中的读取信息 |
-| 数值趋势不稳定 | cutoff、k 点、smearing、q-grid 或模型参数未收敛 | 回到对应 convergence workflow |
+| 没有平台 | 真空不足或方向错误 | 检查 slab cell 和 `idir` |
+| 数值不可比 | 混用不同 Fermi reference | 统一 SCF 和 potential 数据源 |
+| 表面两侧不一致 | 极性 slab 或偶极场 | 记录 dipole correction 和两侧平台 |
 
 ## 通用学习模板
 
-使用 `<system>`、`<structure>`、`<pseudo>`、`<workflow>`、`<upstream_output>` 等占位符记录个人学习任务。本仓库只提供通用审阅框架，不保存具体计算结果。
+使用 `<system>`、`<structure>`、`<pseudo>`、`<k_mesh>`、`<energy_window>`、`<output_format>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
 ## 记录模板
 
 ```text
-<program>.<workflow>.<system>.in
-<program>.<workflow>.<system>.out
+pw.scf.<system>.in
+pw.scf.<system>.out
+pp.potential.<system>.in
+average.<system>.in
+work-function-review.<system>.md
 record.md
 ```
 
 ## 与其他 workflow 的关系
 
-- 上游 workflow 决定本页输入是否可信。
-- 本页输出只有通过 output review 后才能进入下游。
-- 与收敛性相关的问题应回到 `workflows/ground-state/` 或 `workflows/phonon/` 的专门页面处理。
-
-## 后续完善重点
-
-- 补充该 workflow 的 output 段落定位说明。
-- 补充 PASS / WARN / BLOCK 判断的通用审阅表。
-- 补充与相邻 workflow 的数据依赖检查清单。
+- 依赖 electrostatic-potential workflow。
+- 结构构建、slab、vacuum 细节在独立结构学习项目展开。
 
 ## 资料来源
 
 - QE INPUT_PW reference: <https://www.quantum-espresso.org/Doc/INPUT_PW.html>
 - QE INPUT_PP reference: <https://www.quantum-espresso.org/Doc/INPUT_PP.html>
+- QE PostProc guide: <https://www.quantum-espresso.org/Doc/pp_user_guide/>

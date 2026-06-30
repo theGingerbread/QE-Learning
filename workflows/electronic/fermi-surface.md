@@ -3,61 +3,60 @@
 ## 页面定位
 
 - 对应学习路线：[learn/05-electronic-structure-loop.md](../../learn/05-electronic-structure-loop.md)
-- 上游依赖：SCF -> dense NSCF
-- 下游用途：Fermi surface visualization / transport pre-analysis
+- 上游依赖：SCF -> dense NSCF for metallic system
+- 下游用途：BXSF or visualization data for Fermi surface
 - 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
 ## 计算目标
 
-从密集 k 网格本征值生成费米面数据，用于金属电子结构和输运前置判断。
+从金属体系 dense k mesh eigenvalues 生成 Fermi surface 数据，用于与 bands/DOS 交叉验证 Fermi-level 附近电子结构。
 
 ## 输入前提
 
-- `<structure>`、`<pseudo>`、`<system>` 和上游 workflow 已记录。
-- cutoff、k 点、occupation、收敛阈值和物理模型与本 workflow 目标一致。
-- 已明确本 workflow 的目标性质、准入条件和下游用途。
+- 上游 input、output、`record.md` 已可追溯。
+- `<system>`、`<structure>`、`<pseudo>`、cutoff、k 点和 occupation 设置已记录。
+- 已明确本 workflow 输出如何进入下游或图像解释。
 
 ## 计算图
 
 ```text
-<SCF -> dense NSCF>
-  -> fs.x / visualization tools
-  -> <intermediate_state>
-  -> <reviewed_output>
+pw.x scf
+  -> pw.x nscf on dense uniform k mesh
+  -> fs.x
+  -> <system>.bxsf
+  -> XCrySDen / viewer
 ```
 
 ## 需要的 QE 程序
 
-`fs.x` / visualization tools
+`pw.x`、`fs.x`、XCrySDen 或其他可视化工具
 
 ## 通用输入模板
 
-```text
-<program>.<workflow>.<system>.in
-
-<namelist_or_cards>
-  calculation_or_task = 'fermi-surface'
-  prefix = '<system>'
-  outdir = '<scratch_dir>'
-  <input_dependency> = '<upstream_output>'
-  <key_parameter> = <value>
+```fortran
+&FERMI
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  filfermi = 'fermi-surface.<system>.bxsf',
+/
 ```
 
 ## 输入字段说明
 
 | 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
-| `prefix/outdir` | fs.x | 读取上游电子结构数据 | k 网格太稀或 scratch 不一致 | fs.x output |
-| `K_POINTS` | pw.x | dense uniform mesh | 用 path 采样生成费米面 | NSCF output k 点数量 |
-| `Fermi energy` | pw.x/fs.x | 费米面能量参考 | 不同步骤能量零点混用 | output 中 Fermi energy |
+| `prefix/outdir` | fs.x | 读取 dense NSCF 数据 | 读取旧或稀疏数据 | fs.x output |
+| `filfermi` | fs.x | BXSF 输出文件 | 文件名无法追踪 | 生成 BXSF |
+| `K_POINTS automatic` | pw.x nscf | dense uniform k mesh | 用 bands path 生成费米面 | NSCF output k 点数量 |
+| `Fermi energy` | pw.x output | 费米面能量参考 | 与 DOS/bands 零点混用 | output Fermi energy |
 
 ## 通用输出审阅模板
 
 ```markdown
-## Output Review
+## output review
 
-- Program:
-- Calculation type:
+- QE 程序:
+- 计算类型:
 - QE version:
 - Input dependency:
 - Structure summary:
@@ -65,7 +64,7 @@
 - Cutoff reported:
 - K-points reported:
 - Convergence status:
-- Main numerical result:
+- 本 workflow 关键输出:
 - Warnings:
 - Scratch / restart status:
 - PASS / WARN / BLOCK:
@@ -75,48 +74,44 @@
 
 ## 输出判断标准
 
-- 程序正常结束只代表执行完成；还需要检查关键输出、warning 和上游依赖是否一致。
-- 结果进入下游前，应能说明本 workflow 的目标量、数值设置和物理模型没有互相冲突。
-- PASS / WARN / BLOCK 判断必须引用 output 中的具体证据。
+- 仅对有 Fermi surface 的体系有意义。
+- 确认 NSCF k mesh 足够密。
+- BXSF 可视化应与 bands crossing 和 DOS at Fermi level 对照。
 
 ## 收敛性要求
 
-- 上游 SCF 或结构优化应满足本 workflow 的目标精度。
-- cutoff、k 点、smearing、q-grid 或高级模型参数需要围绕目标量检查敏感性。
-- 如果本页只是高级边界页，应记录哪些收敛测试必须在专门 workflow 中完成。
+- Fermi surface 对 k mesh、smearing 和 Fermi level 敏感。
+- 应先完成 bands 和 DOS 的基本一致性检查。
 
 ## 常见错误与诊断
 
 | 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| 程序完成但结果不可解释 | 上游依赖、参数或物理模型记录不足 | 先核对 input、output header、scratch 和 record |
-| 下游读取失败 | `prefix/outdir`、文件前缀或中间文件不一致 | 检查文件名、路径和 output 中的读取信息 |
-| 数值趋势不稳定 | cutoff、k 点、smearing、q-grid 或模型参数未收敛 | 回到对应 convergence workflow |
+| BXSF 不显示或破碎 | k mesh 太稀或文件格式问题 | 加密 NSCF 并检查 fs.x 输出 |
+| 与 bands 不一致 | 能量零点或 band index 混乱 | 对照 Fermi energy 和 bands crossing |
+| 用于非金属体系 | 物理前提错误 | 回到 DOS/bands 判断 |
 
 ## 通用学习模板
 
-使用 `<system>`、`<structure>`、`<pseudo>`、`<workflow>`、`<upstream_output>` 等占位符记录个人学习任务。本仓库只提供通用审阅框架，不保存具体计算结果。
+使用 `<system>`、`<structure>`、`<pseudo>`、`<k_mesh>`、`<energy_window>`、`<output_format>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
 ## 记录模板
 
 ```text
-<program>.<workflow>.<system>.in
-<program>.<workflow>.<system>.out
+pw.scf.<system>.in
+pw.nscf.<system>.in
+fs.<system>.in
+fs.<system>.out
+fermi-surface.<system>.bxsf
 record.md
 ```
 
 ## 与其他 workflow 的关系
 
-- 上游 workflow 决定本页输入是否可信。
-- 本页输出只有通过 output review 后才能进入下游。
-- 与收敛性相关的问题应回到 `workflows/ground-state/` 或 `workflows/phonon/` 的专门页面处理。
-
-## 后续完善重点
-
-- 补充该 workflow 的 output 段落定位说明。
-- 补充 PASS / WARN / BLOCK 判断的通用审阅表。
-- 补充与相邻 workflow 的数据依赖检查清单。
+- 依赖 NSCF dense k mesh。
+- 与 bands 和 DOS 共同判断金属性。
 
 ## 资料来源
 
 - QE PostProc guide: <https://www.quantum-espresso.org/Doc/pp_user_guide/>
+- XCrySDen: <http://www.xcrysden.org/>

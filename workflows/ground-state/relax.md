@@ -4,26 +4,26 @@
 
 - 对应学习路线：[learn/04-relaxation-loop.md](../../learn/04-relaxation-loop.md)
 - 上游依赖：SCF parameter policy and checked structure
-- 下游用途：optimized structure for SCF / bands / DOS / phonon
+- 下游用途：optimized atomic coordinates for static SCF, bands, DOS, phonon
 - 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
 ## 计算目标
 
-在固定晶胞下优化原子位置，使力收敛到目标阈值，并生成可进入下游的结构。
+在固定晶胞下优化原子位置，通过力收敛和最终坐标审阅判断结构能否进入下游。
 
 ## 输入前提
 
-- `<structure>`、`<pseudo>`、`<system>` 和上游 workflow 已记录。
-- cutoff、k 点、occupation、收敛阈值和物理模型与本 workflow 目标一致。
-- 已明确本 workflow 的目标性质、准入条件和下游用途。
+- `<structure>`、`<pseudo>` 和 `<system>` 已记录。
+- SCF 基础参数与本 workflow 目标一致。
+- 已明确输出是否允许进入下游 workflow。
 
 ## 计算图
 
 ```text
-<SCF parameter policy and checked structure>
-  -> pw.x
-  -> <intermediate_state>
-  -> <reviewed_output>
+<initial_structure> + <pseudo> + SCF policy
+  -> pw.x relax
+  -> final atomic positions + force review
+  -> static SCF on relaxed structure
 ```
 
 ## 需要的 QE 程序
@@ -32,15 +32,37 @@
 
 ## 通用输入模板
 
-```text
-<program>.<workflow>.<system>.in
-
-<namelist_or_cards>
-  calculation_or_task = 'relax'
-  prefix = '<system>'
-  outdir = '<scratch_dir>'
-  <input_dependency> = '<upstream_output>'
-  <key_parameter> = <value>
+```fortran
+&CONTROL
+  calculation = 'relax',
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  pseudo_dir = '<pseudo_dir>',
+/
+&SYSTEM
+  ibrav = 0,
+  nat = <number_of_atoms>,
+  ntyp = <number_of_species>,
+  ecutwfc = <wavefunction_cutoff>,
+  ecutrho = <charge_density_cutoff>,
+  occupations = '<occupation_scheme>',
+/
+&ELECTRONS
+  conv_thr = <scf_threshold>,
+/
+ATOMIC_SPECIES
+  <Element> <Mass> <Pseudo.UPF>
+ATOMIC_POSITIONS <coordinate_type>
+  <Element> <x> <y> <z>
+K_POINTS automatic
+  <nk1> <nk2> <nk3> <sk1> <sk2> <sk3>
+CELL_PARAMETERS <unit>
+  <a1x> <a1y> <a1z>
+  <a2x> <a2y> <a2z>
+  <a3x> <a3y> <a3z>
+&IONS
+  ion_dynamics = '<ion_optimizer>',
+/
 ```
 
 ## 输入字段说明
@@ -48,16 +70,17 @@
 | 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
 | `calculation` | pw.x | 设置为 'relax' | 用 SCF 代替结构优化 | output 显示 ionic minimization |
-| `forc_conv_thr` | pw.x | 力收敛阈值 | 未按下游用途设置 | output 中 final forces 与 convergence message |
-| `ion_dynamics` | pw.x | 离子优化算法 | 失败后不清理历史直接续算 | output 显示 optimizer 信息 |
+| `ion_dynamics` | pw.x / &IONS | 离子优化算法 | 失败后不分析优化历史 | output 显示 optimizer 状态 |
+| `forc_conv_thr` | pw.x | 力收敛阈值 | 未按下游目标设置 | output 中 final forces |
+| `ATOMIC_POSITIONS` | pw.x | 初始与最终坐标 | 只保存 input 坐标 | output 末尾 updated coordinates |
 
 ## 通用输出审阅模板
 
 ```markdown
-## Output Review
+## output review
 
-- Program:
-- Calculation type:
+- QE 程序:
+- 计算类型:
 - QE version:
 - Input dependency:
 - Structure summary:
@@ -65,7 +88,7 @@
 - Cutoff reported:
 - K-points reported:
 - Convergence status:
-- Main numerical result:
+- 本 workflow 关键输出:
 - Warnings:
 - Scratch / restart status:
 - PASS / WARN / BLOCK:
@@ -75,47 +98,43 @@
 
 ## 输出判断标准
 
-- 程序正常结束只代表执行完成；还需要检查关键输出、warning 和上游依赖是否一致。
-- 结果进入下游前，应能说明本 workflow 的目标量、数值设置和物理模型没有互相冲突。
-- PASS / WARN / BLOCK 判断必须引用 output 中的具体证据。
+- 检查最后一次电子 SCF 是否收敛。
+- 检查 final forces、convergence message 和 updated coordinates。
+- relax 完成后通常需要用最终结构重跑 static SCF，作为 bands/DOS/phonon 的上游。
 
 ## 收敛性要求
 
-- 上游 SCF 或结构优化应满足本 workflow 的目标精度。
-- cutoff、k 点、smearing、q-grid 或高级模型参数需要围绕目标量检查敏感性。
-- 如果本页只是高级边界页，应记录哪些收敛测试必须在专门 workflow 中完成。
+- cutoff/k mesh 应对 force 收敛足够。
+- 力阈值应与下游目标匹配；phonon 前需要更严格结构审阅。
+- 固定晶胞 relax 不审阅 stress 作为晶胞优化准入。
 
 ## 常见错误与诊断
 
 | 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| 程序完成但结果不可解释 | 上游依赖、参数或物理模型记录不足 | 先核对 input、output header、scratch 和 record |
-| 下游读取失败 | `prefix/outdir`、文件前缀或中间文件不一致 | 检查文件名、路径和 output 中的读取信息 |
-| 数值趋势不稳定 | cutoff、k 点、smearing、q-grid 或模型参数未收敛 | 回到对应 convergence workflow |
+| JOB DONE 但结构不可用 | 离子优化未收敛或最后 SCF 异常 | 检查 final force 和 convergence message |
+| 坐标未更新到记录 | 只保存 input 文件 | 从 output 提取 final coordinates |
+| phonon 出现虚频 | 结构残余力过大或参数不够严格 | 收紧 relax 与 SCF 参数 |
 
 ## 通用学习模板
 
-使用 `<system>`、`<structure>`、`<pseudo>`、`<workflow>`、`<upstream_output>` 等占位符记录个人学习任务。本仓库只提供通用审阅框架，不保存具体计算结果。
+使用 `<system>`、`<structure>`、`<pseudo>`、`<k_mesh>`、`<ecutwfc>`、`<ecutrho>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
 ## 记录模板
 
 ```text
-<program>.<workflow>.<system>.in
-<program>.<workflow>.<system>.out
+pw.relax.<system>.in
+pw.relax.<system>.out
+pw.scf.<system>.relaxed.in
+pw.scf.<system>.relaxed.out
 record.md
 ```
 
 ## 与其他 workflow 的关系
 
-- 上游 workflow 决定本页输入是否可信。
-- 本页输出只有通过 output review 后才能进入下游。
-- 与收敛性相关的问题应回到 `workflows/ground-state/` 或 `workflows/phonon/` 的专门页面处理。
-
-## 后续完善重点
-
-- 补充该 workflow 的 output 段落定位说明。
-- 补充 PASS / WARN / BLOCK 判断的通用审阅表。
-- 补充与相邻 workflow 的数据依赖检查清单。
+- relax 输出结构应进入 static SCF。
+- bands/DOS 使用 static SCF/NSCF，不直接把 relax 输出当最终电子结构。
+- phonon 依赖更严格的结构和 SCF 审阅。
 
 ## 资料来源
 

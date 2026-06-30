@@ -3,61 +3,71 @@
 ## 页面定位
 
 - 对应学习路线：[learn/07-postprocessing-loop.md](../../learn/07-postprocessing-loop.md)
-- 上游依赖：SCF ground state
-- 下游用途：potential profile / work-function analysis
+- 上游依赖：SCF ground state and pp.x potential output
+- 下游用途：potential profile and work-function pre-analysis
 - 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
 ## 计算目标
 
-提取和平均静电势或局域势，用于界面、表面、真空能级和电势对齐分析。
+用 `pp.x` 提取势相关网格，再用 `average.x` 得到方向平均电势，用于界面、slab 和功函数分析前置检查。
 
 ## 输入前提
 
-- `<structure>`、`<pseudo>`、`<system>` 和上游 workflow 已记录。
-- cutoff、k 点、occupation、收敛阈值和物理模型与本 workflow 目标一致。
-- 已明确本 workflow 的目标性质、准入条件和下游用途。
+- 上游 input、output、`record.md` 已可追溯。
+- `<system>`、`<structure>`、`<pseudo>`、cutoff、k 点和 occupation 设置已记录。
+- 已明确本 workflow 输出如何进入下游或图像解释。
 
 ## 计算图
 
 ```text
-<SCF ground state>
-  -> pp.x, `average.x`
-  -> <intermediate_state>
-  -> <reviewed_output>
+pw.x scf
+  -> pp.x potential output
+  -> average.x along <direction>
+  -> planar/macro averaged potential profile
 ```
 
 ## 需要的 QE 程序
 
-`pp.x`, `average.x`
+`pp.x`、`average.x`
 
 ## 通用输入模板
 
-```text
-<program>.<workflow>.<system>.in
+```fortran
+&INPUTPP
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  plot_num = <potential_plot_num>,
+  filplot = 'potential.<system>.dat',
+/
+&PLOT
+  iflag = 3,
+  output_format = <output_format>,
+  fileout = 'potential.<system>.<format>',
+/
 
-<namelist_or_cards>
-  calculation_or_task = 'electrostatic-potential'
-  prefix = '<system>'
-  outdir = '<scratch_dir>'
-  <input_dependency> = '<upstream_output>'
-  <key_parameter> = <value>
+&AVERAGE
+  input_file = 'potential.<system>.dat',
+  output_file = 'potential-average.<system>.dat',
+  idir = <average_direction>,
+/
 ```
 
 ## 输入字段说明
 
 | 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
-| `plot_num` | pp.x | 选择势相关输出 | 混淆总势、局域势和静电势 | pp.x output 和数据说明 |
-| `iflag/output_format` | pp.x | 定义输出网格和格式 | 输出维度不适合平均 | 生成文件可被 average.x 读取 |
-| `idir` | average.x | 选择平均方向 | 方向与表面法向不一致 | average.x 输出 profile |
+| `plot_num` | pp.x | 选择势相关物理量 | 混淆 electrostatic/local/total potential | pp.x output |
+| `idir` | average.x | 平均方向 | 方向与 slab 法向不一致 | average profile |
+| `output_format` | pp.x | 输出格式 | average.x 或可视化工具无法读取 | 生成文件 |
+| `prefix/outdir` | pp.x | 读取 SCF 数据 | 旧 scratch | pp.x output |
 
 ## 通用输出审阅模板
 
 ```markdown
-## Output Review
+## output review
 
-- Program:
-- Calculation type:
+- QE 程序:
+- 计算类型:
 - QE version:
 - Input dependency:
 - Structure summary:
@@ -65,7 +75,7 @@
 - Cutoff reported:
 - K-points reported:
 - Convergence status:
-- Main numerical result:
+- 本 workflow 关键输出:
 - Warnings:
 - Scratch / restart status:
 - PASS / WARN / BLOCK:
@@ -75,47 +85,43 @@
 
 ## 输出判断标准
 
-- 程序正常结束只代表执行完成；还需要检查关键输出、warning 和上游依赖是否一致。
-- 结果进入下游前，应能说明本 workflow 的目标量、数值设置和物理模型没有互相冲突。
-- PASS / WARN / BLOCK 判断必须引用 output 中的具体证据。
+- 确认势类型、单位和方向。
+- 平均方向应与目标表面/界面法向一致。
+- slab/work function 分析需看到足够平坦的真空平台。
 
 ## 收敛性要求
 
-- 上游 SCF 或结构优化应满足本 workflow 的目标精度。
-- cutoff、k 点、smearing、q-grid 或高级模型参数需要围绕目标量检查敏感性。
-- 如果本页只是高级边界页，应记录哪些收敛测试必须在专门 workflow 中完成。
+- 势 profile 对 slab 厚度、真空、偶极修正和 SCF 收敛敏感。
+- work function 前应先完成 potential profile 审阅。
 
 ## 常见错误与诊断
 
 | 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| 程序完成但结果不可解释 | 上游依赖、参数或物理模型记录不足 | 先核对 input、output header、scratch 和 record |
-| 下游读取失败 | `prefix/outdir`、文件前缀或中间文件不一致 | 检查文件名、路径和 output 中的读取信息 |
-| 数值趋势不稳定 | cutoff、k 点、smearing、q-grid 或模型参数未收敛 | 回到对应 convergence workflow |
+| 没有真空平台 | 真空不足或 slab 设置不合理 | 回到结构和 SCF 输入检查 |
+| 方向错误 | idir 与表面法向不一致 | 检查 CELL_PARAMETERS 和平均方向 |
+| 势类型混淆 | plot_num 未核对 | 查 INPUT_PP 并记录定义 |
 
 ## 通用学习模板
 
-使用 `<system>`、`<structure>`、`<pseudo>`、`<workflow>`、`<upstream_output>` 等占位符记录个人学习任务。本仓库只提供通用审阅框架，不保存具体计算结果。
+使用 `<system>`、`<structure>`、`<pseudo>`、`<k_mesh>`、`<energy_window>`、`<output_format>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
 ## 记录模板
 
 ```text
-<program>.<workflow>.<system>.in
-<program>.<workflow>.<system>.out
+pw.scf.<system>.out
+pp.potential.<system>.in
+pp.potential.<system>.out
+average.<system>.in
+average.<system>.out
+potential-average.<system>.dat
 record.md
 ```
 
 ## 与其他 workflow 的关系
 
-- 上游 workflow 决定本页输入是否可信。
-- 本页输出只有通过 output review 后才能进入下游。
-- 与收敛性相关的问题应回到 `workflows/ground-state/` 或 `workflows/phonon/` 的专门页面处理。
-
-## 后续完善重点
-
-- 补充该 workflow 的 output 段落定位说明。
-- 补充 PASS / WARN / BLOCK 判断的通用审阅表。
-- 补充与相邻 workflow 的数据依赖检查清单。
+- work-function 依赖本页 profile。
+- charge-density/ELF 共享 pp.x 数据边。
 
 ## 资料来源
 
