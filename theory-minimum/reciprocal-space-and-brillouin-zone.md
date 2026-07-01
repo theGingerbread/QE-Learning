@@ -8,7 +8,7 @@
 
 晶体的实空间由一组平移矢量重复生成。电子在这样的周期势中运动时，不需要用一个无限大的波函数直接描述整个晶体；Bloch theorem 说明电子态可以写成平面波相位因子乘以具有晶格周期的函数。这个相位因子的波矢就是 `k`，它标记电子态在周期平移下如何改变相位。
 
-倒空间可以看成“相位变化的空间”。实空间晶格矢量描述原子如何周期排列，倒空间晶格矢量描述波函数相位和 Fourier 分量如何周期重复。Brillouin zone 是倒空间中的 primitive cell；由于相差一个倒格矢的 `k` 点描述等价的 Bloch 相位，电子结构只需在第一 Brillouin zone 中审阅。
+倒空间可以看成“相位变化的空间”。实空间晶格矢量描述原子如何周期排列，倒空间晶格矢量描述波函数相位和 Fourier 分量如何周期重复。实空间晶胞越大，倒空间 primitive cell 越小；晶胞形状改变时，倒空间坐标轴、BZ 形状和相同整数 mesh 对应的实际 reciprocal spacing 都会改变。Brillouin zone 是倒空间中的 primitive cell；由于相差一个倒格矢的 `k` 点描述等价的 Bloch 相位，电子结构只需在第一 Brillouin zone 中审阅。
 
 声子也有类似结构。原子位移可以按波矢 `q` 分解成集体振动模式；`q=0` 表示所有原胞同相振动，有限 `q` 表示不同原胞之间存在相位差。因此 k-point 和 q-point 不是任意采样标签，而是周期体系中动量、相位和积分的基本语言。
 
@@ -33,7 +33,7 @@ psi_nk(r) = exp(i k · r) u_nk(r)
 | 对象 | QE 位置 | 含义 | output 证据 |
 |---|---|---|---|
 | `CELL_PARAMETERS` / `ibrav` | `pw.x` input | 定义实空间晶胞，也决定倒空间基矢 | cell、reciprocal axes、symmetry summary |
-| `K_POINTS automatic` | `pw.x` card | 定义用于 BZ integration 的 uniform mesh | k-point count、weights、irreducible k-points |
+| `K_POINTS automatic` | `pw.x` card | 定义用于 BZ integration 的 uniform mesh，格式为 `nk1 nk2 nk3 sk1 sk2 sk3` | full mesh、shift、weights、irreducible k-points |
 | `K_POINTS crystal_b` / `tpiba_b` | `pw.x` bands input | 定义 high-symmetry path | bands k-point list |
 | q-point / q-grid | `ph.x` input/output | 定义 phonon response 的倒空间采样 | q-point list、`nq1/nq2/nq3`、dyn files |
 | `q_in_cryst_coord` | `matdyn.x` | 说明 phonon path 坐标基底 | `matdyn.x` input echo |
@@ -41,8 +41,9 @@ psi_nk(r) = exp(i k · r) u_nk(r)
 
 ## Output 中的可见证据
 
-- `number of k points` 与 k-point weights 显示 QE 实际读取的 mesh 或 path。
-- `number of k points= ...` 后的 irreducible k-point 信息显示 symmetry 是否参与约化。
+- `K_POINTS automatic` 的完整证据应同时保留 full mesh `nk1 nk2 nk3`、shift `sk1 sk2 sk3`、QE 输出的 `number of k points`、k-point weights 和 irreducible k-point count；只写“用了 N 个 k 点”不足以复查采样。
+- `number of k points` 与 k-point weights 显示 QE 实际读取的 mesh 或 path；在 uniform mesh 场景下，权重之和和 irreducible 点数可以帮助判断 symmetry 约化是否按预期发生。
+- full mesh 与 irreducible k-points 不是同一个概念：前者是输入采样网格，后者是 QE 在 symmetry 下实际需要计算的代表点。换 cell、关 symmetry、启用 SOC 或改变磁性设置后，irreducible count 变化本身就是需要审阅的证据。
 - cell 与 reciprocal axes 输出决定 `crystal`、`tpiba`、`crystal_b`、`tpiba_b` 坐标解释。
 - `ph.x` q-point list 和 `dyn0`/dyn file sequence 显示 q-grid 是否完整。
 - `bands.x`、`matdyn.x` 的 path 输出只能说明路径被读取，不能说明 BZ integration 已收敛。
@@ -51,6 +52,7 @@ psi_nk(r) = exp(i k · r) u_nk(r)
 
 - SCF、relax、NSCF、DOS、Fermi surface 依赖 uniform k mesh。
 - bands 和 phonon dispersion 依赖 high-symmetry path，但 path 不替代 mesh convergence。
+- uniform mesh 用来近似 BZ 积分；high-symmetry path 用来展示沿特定方向的能带或声子色散。前者回答“积分量是否稳定”，后者回答“谱线在关键方向如何变化”。
 - phonon q-grid 决定 real-space IFC 的可恢复范围，影响 dispersion interpolation 和 phonon DOS。
 - cell 改变后，原来“看起来相同”的 k mesh 可能对应不同 reciprocal spacing。
 - symmetry 改变后，irreducible k-points、band degeneracy、phonon irreps 和 path labels 都可能变化。
@@ -63,9 +65,15 @@ psi_nk(r) = exp(i k · r) u_nk(r)
 - 将 `q=0` phonon 当作完整 q-space 响应。
 - 用更密 path 取代 DOS 或 Fermi surface 所需 uniform mesh。
 
-## 判断边界
+## PASS / WARN / BLOCK 关联
 
 倒空间设置的 `PASS` 不是“k 点很多”，而是目标物理量对采样方式足够稳定且 output 可复查。若目标是 total energy、force、stress、DOS 或 phonon response，应检查对应 mesh；若目标是 band plot，应检查 path 来源、cell convention 和 energy reference。
+
+| 等级 | 可接受证据 | 处理方式 |
+|---|---|---|
+| `PASS` | uniform mesh 的 full `nk1 nk2 nk3`、shift、QE 输出的 irreducible count 和 weights 可追溯；目标物理量已按对应 mesh 或 q-grid 做过稳定性审阅；band/phonon path 的坐标基底、cell convention 和能量/频率参考清楚。 | 可作为本轮 workflow 证据继续使用。 |
+| `WARN` | 只记录了 irreducible 点数或总点数，但缺少 full mesh/shift；path 来源可见但 cell convention 未复核；结构、symmetry、SOC 或 magnetism 改动后沿用了旧 path。 | 不直接判错，但需要补齐 output 证据或重新审阅路径/mesh 与当前 cell 的一致性。 |
+| `BLOCK` | 用 high-symmetry path 替代 SCF/DOS/Fermi-surface/phonon response 的 uniform mesh；无法从 input/output 还原 full mesh、shift 或 q-grid；q-space 只算 `q=0` 却声称得到完整 dispersion/DOS；cell 或 symmetry 已改变但没有任何 k/q 采样复查。 | 不能作为可靠倒空间采样证据，应回到对应 workflow 重新生成并保存 input/output 证据。 |
 
 ## 对应 workflow
 
