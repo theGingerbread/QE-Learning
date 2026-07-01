@@ -2,7 +2,7 @@
 
 ## 本页解决什么问题
 
-本页用于判断 work function、electrostatic potential、vacuum level 和 slab electrostatics 的结果是否可用于科研结论。work function 不能从任意 potential 图上读出一个差值；它依赖同一条 SCF -> `pp.x` -> planar average -> output review 的证据链。
+本页用于判断 work function、electrostatic potential、vacuum level 和 slab electrostatics 的结果是否可用于科研结论。work function 的物理对象是同一计算链中 vacuum level 与电子化学势或 Fermi reference 的能量差；在 QE workflow 中，它依赖 SCF -> `pp.x` -> planar/macroscopic average -> output review 的证据链。
 
 表面、界面和低维模型中，能量零点、真空平台、偶极、表面终止、Fermi level、slab 厚度、vacuum 区域和 smearing 都可能改变结论。若这些边界没有记录，数值结果只能作为未完成审阅的中间量。
 
@@ -26,6 +26,8 @@
 - workflow 传播误差：relax、final SCF、DOS/potential 使用不同 `prefix/outdir` 或不同模型。
 - 真实物理效应：表面偶极、吸附诱导 charge redistribution、极性表面或外场确实改变 vacuum level。
 
+电势零点本身不是绝对物理量；同一条数据链内部的能量差才可解释。Planar average 用来沿 slab 法向压缩三维电势，macroscopic average 可进一步平滑晶格振荡，但二者都不能替代平台审阅。若真空区仍有系统性斜率或两侧平台不一致，应先判断这是 slab asymmetry、外场/偶极、真空不足还是物理表面偶极，而不是从图上任取一点。
+
 ## 必查 QE input/output
 
 | 对象 | 程序或文件 | 检查意义 |
@@ -43,7 +45,7 @@
 
 1. work function 至少需要同一计算链中的 vacuum level 与 Fermi energy。二者来源、单位和 energy reference 必须可追溯。
 2. vacuum plateau 是必要证据。没有稳定平台时，不能从曲线局部读数给定量 work function。
-3. asymmetric slab、外电场、charged slab 或强表面偶极需要单独说明 boundary condition；否则 work function 只能作为未完成审阅结果。
+3. asymmetric slab、外电场、charged slab 或强表面偶极需要单独说明 boundary condition；偶极修正或 ESM 入口是模型选择和边界处理，不是普适修复按钮。
 4. visualization 只帮助发现问题，不构成物理证明。结论必须回到 SCF、`pp.x`、average 和 calculation record。
 5. 跨 slab thickness、vacuum、dipole setting、functional 或 termination 的比较必须写清模型和边界差异。
 
@@ -53,7 +55,7 @@
 |---|---|---|
 | PASS | SCF、slab 构型、potential file、average direction、vacuum plateau、Fermi energy、energy reference、boundary condition 和 warning 均已审阅 | 可报告同一模型下的 work function 或趋势 |
 | WARN | plateau 可读但 vacuum/slab/dipole/smearing sensitivity 未完全审阅 | 只允许写趋势或内部比较 |
-| BLOCK | 无 vacuum plateau；Fermi level 未记录；potential reference 不明；slab 构型或平均方向不清；从图像直接读数 | 停止定量 work function 结论 |
+| BLOCK | 无 vacuum plateau；Fermi level 或电子化学势参考未记录；potential reference 不明；slab 构型或平均方向不清；两侧平台/偶极边界未解释；从图像直接读数 | 停止定量 work function 结论 |
 
 ## 不能做出的过度结论
 
@@ -62,6 +64,7 @@
 - 不能把 `pp.x` 正常结束当作 electrostatic boundary 已可信。
 - 不能把 semiconductor/insulator surface 的 Fermi-level convention 省略后仍给强定量结论。
 - 不能把 surface work function 的变化全部归因于化学效应而不审阅结构、smearing 和电势平台。
+- 不能把 dipole correction 或 isolated-boundary 设置写成自动提高可信度；它们需要与 slab asymmetry、真空平台和能量参考一起审阅。
 
 ## 下游影响
 

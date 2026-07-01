@@ -53,6 +53,8 @@ average.x < average.<system>.in > average.<system>.out
 
 work function review 文件应记录：SCF output 中的 `E_F`、average profile 中选取的 `E_vac`、plateau 选择规则、能量单位、是否做图像平移、以及 `E_vac - E_F` 是否来自同一数据链。不要把绘图脚本里平移后的曲线数值当作原始 output 证据。
 
+电势平均的审阅顺序应保持固定：先确认 `pp.x` 读取的 `prefix/outdir` 与 SCF 一致，再确认 `plot_num` 和平均方向，随后检查 planar average 是否有 vacuum plateau，最后才选择 `E_vac` 并与 SCF 的 `E_F` 做差。若使用 macroscopic average、偶极修正、外电场或低维边界设置，应在记录中说明它们改变了什么边界条件，以及它们不能单独证明 slab 已经收敛。
+
 ## 通用审阅模板
 
 ```markdown
@@ -80,6 +82,7 @@ work function review 文件应记录：SCF output 中的 `E_F`、average profile
 | potential profile | `pp.x`、`average.x` output、profile data | `E_vac` 候选区可审阅 | 平台一定适合定量 | 无平坦 plateau 为 `BLOCK` |
 | Fermi energy | SCF output | `E_F` 来源明确 | 其与所有后处理能量零点自动一致 | Fermi reference 未记录为 `BLOCK` |
 | dipole/boundary | input/output、record | 偶极或低维边界处理可追踪 | 修正后必然收敛 | 非对称 slab 未处理且平台倾斜为 `WARN/BLOCK` |
+| 两侧平台 | averaged profile | 非对称 slab 或偶极效应是否可见 | 两侧差异一定是物理效应 | 两侧平台不一致且无边界说明为 `WARN/BLOCK` |
 | 同一数据链 | `prefix/outdir`、file timestamps、record | `E_vac` 与 `E_F` 同源 | model error 已消除 | 混用不同计算结果为 `BLOCK` |
 
 ## 收敛与可靠性
@@ -88,6 +91,7 @@ work function review 文件应记录：SCF output 中的 `E_F`、average profile
 - 真空平台不平坦、平均方向错误或 `E_F` 来源不明时，不能给定量 work function。
 - 对表面两侧不等价的 slab，应分别审阅两侧平台或说明采用的边界处理。
 - work function 是后处理结果，可信度继承 ground-state SCF 和 electrostatic potential workflow。
+- dipole correction、external field 或 isolated-boundary 设置应作为边界条件记录和敏感性对象；不要把它们写成自动修复真空平台的通用步骤。
 
 ## PASS / WARN / BLOCK
 
