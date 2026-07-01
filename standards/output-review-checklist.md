@@ -228,6 +228,17 @@ relax/vc-relax 的 output 是结构优化记录，不应直接替代基于最终
 - [ ] Fermi level、energy zero、plot 或 `bands.x` 输出的参考能量已明确。
 - [ ] band crossing、metal/insulator 判断、spin/SOC 分支标记与 input 设置一致。
 
+### Evidence table
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| 上游读取 | `pw.bands` output、`prefix/outdir`、SCF record | bands 数据来自目标 SCF | SCF 已对所有性质收敛 | `prefix/outdir` 错配为 `BLOCK` |
+| k-path | `K_POINTS` echo、路径来源记录、k 点数量 | 路径和标签可复查 | 路径一定符合当前结构标准化 | cell convention 不一致为 `BLOCK` |
+| band 数量 | number of Kohn-Sham states、`nbnd` | 目标能区是否被覆盖 | 高能或激发态性质已经可靠 | 目标能区缺 bands 为 `BLOCK` |
+| energy reference | Fermi energy、VBM/CBM、绘图脚本 | 图中零点可追踪 | DFT gap 等于实验 gap | energy zero 不明为 `BLOCK` |
+| `bands.x` 产物 | `filband`、`filband.gnu`、`filband.rap` | 绘图文件来自当前计算 | 图像解释已经成立 | 文件缺失或 warning 未解释为 `BLOCK` |
+| spin/SOC/symmetry | output 中 spin、SOC、noncollinear、symmetry 信息 | 图例和分支与模型一致 | 简并、拓扑或劈裂结论自动成立 | 分支标签不清为 `WARN` |
+
 ### WARN 触发
 
 - k-path 来源可追踪但未与具体晶胞标准化流程完全对齐。
@@ -258,6 +269,17 @@ relax/vc-relax 的 output 是结构优化记录，不应直接替代基于最终
 - [ ] 总 DOS 文件生成成功，能量零点和单位明确。
 - [ ] DOS 积分、电荷数或占据趋势与体系电子数定性一致。
 - [ ] 金属/绝缘体判断与 SCF、NSCF、bands 结果交叉检查。
+
+### Evidence table
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| 上游 NSCF | NSCF output、`dos.x` output、`prefix/outdir` | DOS 来自 dense uniform mesh | mesh 已充分收敛 | 用路径型 k-list 为 `BLOCK` |
+| k-points | NSCF k-point summary | BZ 积分网格可复查 | 峰位已定量可信 | mesh 过稀用于定量为 `WARN/BLOCK` |
+| broadening / method | `dos.x` input、`bz_sum`、`degauss` | DOS 展宽和求和方法可复查 | 曲线平滑代表物理精度 | 未记录 broadening 为 `WARN` |
+| energy grid | `fildos`、`Emin/Emax/DeltaE` | 能量窗口和步长可复查 | 窗口外结论可靠 | 目标能区缺失为 `BLOCK` |
+| Fermi reference | SCF/NSCF output、plot script | 能量零点来源明确 | DFT gap 可直接当实验 gap | Fermi/VBM/CBM 混乱为 `BLOCK` |
+| bands 对照 | bands output、DOS near Fermi level | 金属性或 gap 趋势可交叉审阅 | 模型误差已消除 | DOS 与 bands 冲突未解释为 `WARN/BLOCK` |
 
 ### WARN 触发
 
@@ -290,6 +312,17 @@ relax/vc-relax 的 output 是结构优化记录，不应直接替代基于最终
 - [ ] energy zero、Fermi level、broadening 与 DOS 对齐或差异已说明。
 - [ ] 总 PDOS 与 DOS 的关系已做定性 sanity check。
 
+### Evidence table
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| wavefunction 读取 | `projwfc.x` output、`prefix/outdir` | 投影来自目标 NSCF | 上游已对所有投影收敛 | 读取失败或错配为 `BLOCK` |
+| band/window 覆盖 | `nbnd`、`Emin/Emax`、PDOS 文件 | 目标能区有投影数据 | 高能态解释完整 | 关键窗口缺失为 `WARN/BLOCK` |
+| 投影标签 | state labels、atomic labels、PDOS filenames | 原子/轨道通道可追踪 | PDOS 是唯一化学分解 | 标签不可解释为 `BLOCK` |
+| broadening / zero | PDOS input、DOS 对照、plot script | 与 DOS 的能量参考可对齐 | 峰强度可直接比较为电荷 | 未对齐为 `WARN/BLOCK` |
+| Lowdin / projection summary | `projwfc.x` stdout | 可作为辅助投影证据 | 充分证明价态或电荷转移 | 单独用作价态结论为 `WARN` |
+| spin/SOC/noncollinear | output 分量标签 | 分量解释有模型依据 | 可按普通标量轨道解释 | 分量未说明为 `WARN` |
+
 ### WARN 触发
 
 - 投影标签复杂或存在简并/混合，需要人工解释。
@@ -321,6 +354,16 @@ relax/vc-relax 的 output 是结构优化记录，不应直接替代基于最终
 - [ ] charge density、potential、ELF、STM 或其他后处理量的物理含义没有混用。
 - [ ] 后处理量与上游计算类型匹配，例如是否需要 spin/SOC/NSCF 数据。
 
+### Evidence table
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| 上游读取 | `pp.x` output、`prefix/outdir` | 后处理数据来自目标 SCF/NSCF | 上游本身可信 | 上游为 `BLOCK` 或读取旧数据为 `BLOCK` |
+| `plot_num` | input、当前 `INPUT_PP`、`pp.x` output | 输出物理量类型可复查 | 图像解释自动成立 | 编号未核对为 `WARN`；选错为 `BLOCK` |
+| grid / dimension | `iflag`、file header、output | 维度和网格与目标一致 | 网格足以定量分析 | 切片/方向不符为 `WARN/BLOCK` |
+| file output | `filplot`、`fileout`、时间戳 | 文件来自当前运行 | 文件未被后续处理改变 | 文件缺失或覆盖风险为 `BLOCK` |
+| 可视化设置 | figure script、色标、等值面、单位 | 图件可复现 | 图像等于物理结论 | 未记录设置为 `WARN` |
+
 ### WARN 触发
 
 - 输出文件可用但网格较粗，只适合预览。
@@ -341,6 +384,53 @@ relax/vc-relax 的 output 是结构优化记录，不应直接替代基于最终
 - `PASS`：电荷密度/势/ELF 等图件、定性空间分布分析、与电子结构结果交叉检查。
 - `WARN`：可视化参数调试、网格和格式转换测试；不得作为最终空间分布结论。
 - `BLOCK`：不允许进入图件归档、定量解释或下游可视化分析。
+
+## Electrostatic potential
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| potential 类型 | `plot_num`、`INPUT_PP`、`pp.x` output | electrostatic/local/total potential 类型可复查 | 不同 potential 可混用 | 类型不清为 `WARN`；选错为 `BLOCK` |
+| average direction | `average.x` input/output、cell record | 平均方向与目标一致 | 真空平台存在 | 方向与 slab 法向不符为 `BLOCK` |
+| energy reference | SCF Fermi energy、profile offset、plot script | profile 零点可复查 | 零点选择不影响结论 | 参考混乱为 `BLOCK` |
+| vacuum plateau | averaged profile | 是否能读取真空参考 | work function 已可信 | 平台不平坦仍读数为 `BLOCK` |
+
+## ELF
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| ELF 数据来源 | `pp.x` output、`prefix/outdir` | ELF 来自目标 SCF | 成键结论成立 | 上游或 `plot_num` 错误为 `BLOCK` |
+| 可视化设置 | 等值面、切片、色标、软件版本 | 图像可复现 | ELF 是键强度定量指标 | 未记录设置为 `WARN` |
+| 交叉证据 | charge density、PDOS、结构记录 | ELF 解释有辅助证据 | ELF 单独证明电荷转移 | 单独过度解释为 `WARN/BLOCK` |
+
+## Work function
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| SCF 与 slab 状态 | SCF review、结构记录 | `E_F` 和 slab 来源可追踪 | 真空/表面已收敛 | 上游为 `BLOCK` 则本页为 `BLOCK` |
+| vacuum level | averaged potential profile | 可选取 `E_vac` | 平台足够平坦或已收敛 | 无平台为 `BLOCK` |
+| Fermi energy | SCF output | `E_F` 来源明确 | 与任何 potential 文件可混用 | Fermi reference 未记录为 `BLOCK` |
+| 边界/偶极 | input/output、record | dipole/低维边界处理可追踪 | 修正必然充分 | 非对称 slab 平台倾斜未解释为 `WARN/BLOCK` |
+| 同一数据链 | `prefix/outdir`、文件时间戳、record | `E_vac` 与 `E_F` 同源 | model error 已消除 | 混用不同数据链为 `BLOCK` |
+
+## Fermi surface
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| 金属性前提 | bands、DOS、SCF occupation | 费米面 workflow 有对象 | 费米面已定量可信 | 非金属性或前提不清为 `WARN/BLOCK` |
+| dense NSCF | NSCF k-point summary | uniform mesh 可追踪 | mesh 已足够 | mesh 过粗为 `WARN/BLOCK` |
+| Fermi energy | SCF/NSCF output、BXSF header | 能量参考可复查 | 不受 smearing 影响 | Fermi level 不稳定为 `BLOCK` |
+| band coverage | `nbnd`、eigenvalue range | crossing bands 被包含 | band connectivity 已完全解决 | band 数不足为 `BLOCK` |
+| visualization | BXSF、viewer settings | 图像可显示 | 图像就是物理证明 | 与 DOS/bands 冲突未解释为 `WARN/BLOCK` |
+
+## Electronic common BLOCK triggers
+
+- bands/DOS/PDOS/pp.x 读取的 `prefix/outdir` 与上游 SCF/NSCF 不一致。
+- 用 high-symmetry bands path 结果支撑 DOS、PDOS 或 Fermi surface。
+- energy zero、Fermi level、VBM/CBM 或 vacuum level 未记录却给定量结论。
+- 把 semilocal DFT band gap 写成实验 gap 或 quasiparticle gap。
+- 把 DOS 平滑程度、PDOS 投影强度、ELF 图像或 BXSF 可视化当作单独物理证明。
+- work function 缺少真空平台、Fermi energy 或同一数据链证据。
+- 上游 SCF/NSCF 为 `BLOCK`，但仍进入电子结构或后处理解释。
 
 ## Phonon
 
