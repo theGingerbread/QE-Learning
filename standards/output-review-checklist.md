@@ -434,34 +434,95 @@ relax/vc-relax 的 output 是结构优化记录，不应直接替代基于最终
 
 ## Phonon
 
-### Output 中要看
+### Gamma phonon review
 
-- [ ] 前置结构来自可信 relax/vc-relax 后的 final static SCF。
-- [ ] `ph.x` output 中每个 q-point、irreducible representation、perturbation 都达到收敛。
-- [ ] dielectric、effective charge、Raman、electron-phonon 等可选量只在 input 目标要求时解释。
-- [ ] dyn 文件、q-point 列表、`q2r.x`、`matdyn.x`、freq 或 phonon DOS 文件链完整。
-- [ ] ASR 设置、声学模、负频/虚频、单位和绘图能量零点已记录。
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| 上游 final SCF | `ph.x` header、SCF record、`prefix/outdir` | `ph.x` 读取目标 ground-state 数据 | SCF 对 phonon 已充分收敛 | 上游 SCF 为 `BLOCK` 则 Gamma phonon 为 `BLOCK` |
+| q 点 | `ph.x` q-vector 输出 | 当前为 Gamma calculation | 全 BZ 动力学稳定 | 把 Gamma 结果当完整稳定性证明为 `BLOCK` |
+| perturbation convergence | `ph.x` 每个 irrep / perturbation | DFPT 响应迭代完成 | cutoff/kmesh/q-grid 已收敛 | 任一关键 perturbation 未收敛为 `BLOCK` |
+| acoustic modes | `dynmat.x` 或 `ph.x` frequency table | 平移模式和 ASR 状态可审阅 | 小偏差已解释 | 明显偏离零且未复查为 `WARN/BLOCK` |
+| `fildyn` 数据链 | `ph.x` input/output、`dynmat.x` input/output | 后处理读取当前 Gamma dynamical matrix | 没有旧 scratch 风险 | `fildyn` 混用为 `BLOCK` |
 
-### WARN 触发
+### ph.x q-grid review
 
-- 小负频或声学模偏离零点，但尚未完成 cutoff、k/q mesh、力阈值或 ASR 排查。
-- 个别 perturbation 收敛较慢，但 output 完整且只用于诊断。
-- q-mesh、smearing 或阈值只适合初步稳定性判断。
-- ASR 或 non-analytical correction 设置需要在图和记录中明确。
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| `ldisp` 和 `nq1/nq2/nq3` | `ph.x` input echo、q-point list | q-grid 被定义并写入记录 | q-grid 对目标已收敛 | q-grid 未记录为 `WARN` |
+| q-point 覆盖 | `ph.x` q-point list、`dyn0`、dyn 文件列表 | q-grid 计算完整性可检查 | 没有缺失分段 | dyn 文件缺失为 `BLOCK` |
+| 每点响应收敛 | 每个 q point / irrep / perturbation | DFPT 方程在该点收敛 | 结构和 SCF 已无误差 | 关键 q point 未收敛为 `BLOCK` |
+| warning | `ph.x` output | 识别 metal、symmetry、restart、response 异常 | warning 可以忽略 | warning 未解释为 `WARN/BLOCK` |
 
-### BLOCK 触发
+### q2r review
 
-- 前置结构未充分 relax，或 final static SCF 不可信。
-- `ph.x` 任一关键 q-point/perturbation 未收敛、异常中止或 dyn 文件缺失。
-- q-point、dyn、fc、freq 文件链不完整或混用不同结构/参数。
-- 负频明显且未能归类为数值误差、声学零点问题或真实不稳定性。
-- ASR、单位、q-path 或文件来源不明，导致结果不可复查。
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| `fildyn` 前缀 | `q2r.x` input/output | q2r 读取目标 dyn 系列 | dyn 来自当前结构 | 前缀错配为 `BLOCK` |
+| 完整 dyn 集合 | `q2r.x` output、文件列表 | IFC 由完整 q-grid 转换 | q-grid 已收敛 | dyn 缺失为 `BLOCK` |
+| `flfrc` 输出 | `q2r.x` output、record | real-space IFC 可追踪 | IFC 可用于所有下游 | `flfrc` 覆盖或来源不明为 `BLOCK` |
+| `zasr` | q2r input/output | Born charge 相关 ASR 处理可追踪 | 上游错误已被修正 | 未记录 ASR 为 `WARN` |
+
+### matdyn dispersion review
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| `flfrc` 来源 | `matdyn.x` input/output | dispersion 使用目标 IFC | IFC 上游可信 | 读取错误 `flfrc` 为 `BLOCK` |
+| q-path | `matdyn.x` input/output | plotted path 可复查 | q-path 与结构标准化一定一致 | q-path 来源不明为 `WARN/BLOCK` |
+| `asr` | `matdyn.x` input/output | ASR 后处理可追踪 | ASR 可替代收敛 | 用 ASR 掩盖错误为 `BLOCK` |
+| frequency table | `flfrq`、`matdyn.x` output | branch、单位、负频可审阅 | 虚频来源已判定 | 虚频未 triage 为 `WARN/BLOCK` |
+| polar correction | dielectric/Born record、matdyn 设置 | LO-TO 设置可追踪 | polar correction 必然适用 | 来源不明为 `BLOCK` |
+
+### Phonon DOS review
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| `dos=.true.` | `matdyn.x` input/output | 当前为 phonon DOS mode | 与 dispersion 一致 | DOS mode 不明确为 `WARN` |
+| DOS mesh | `nk1/nk2/nk3`、output | q-space sampling 可复查 | mesh 已足够 | mesh 未记录或太粗为 `WARN/BLOCK` |
+| `deltaE` / `fldos` | input、DOS 文件 | 频率步长和文件来源可复查 | 平滑曲线可信 | broadening/step 未记录为 `WARN` |
+| imaginary modes | DOS frequency range、dispersion review | 低频风险进入记录 | 虚频已解释 | 隐藏负频为 `BLOCK` |
+
+### Dielectric tensor / Born effective charge review
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| `epsil=.true.` | `ph.x` input echo | 请求 electric-field response | 响应物理条件满足 | 金属或条件不清为 `BLOCK` |
+| dielectric tensor | `ph.x` tensor output | 张量已输出 | 张量已收敛或可直接实验对比 | 缺失或 warning 为 `WARN/BLOCK` |
+| Born charge tensor | `ph.x` tensor output | 有效电荷张量已输出 | 异常值一定是真实物理 | symmetry 异常未解释为 `WARN/BLOCK` |
+| non-analytic chain | `dynmat.x`/`matdyn.x` 设置、record | LO-TO 来源可追踪 | correction 必然充分 | tensor 和 IFC 来源不一致为 `BLOCK` |
+
+### IR / Raman review
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| Gamma modes | Gamma phonon review | 谱学分支有可信 modes | 强度或 activity 已存在 | Gamma 为 `BLOCK` 则本页为 `BLOCK` |
+| response tensor | `ph.x` IR/Raman output | 相关分支已执行 | 可直接复现实验光谱 | tensor 未输出却解释 activity 为 `BLOCK` |
+| mode symmetry / degeneracy | `dynmat.x`、symmetry output | 模式归属可审阅 | mode mixing 已完全解决 | 归属不清为 `WARN` |
+| experimental comparison boundary | record、figure caption | 近似和单位可追踪 | 有限温实验谱已被复现 | 未说明边界为 `WARN/BLOCK` |
+
+### Imaginary frequency triage
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| 位置和 branch | frequency file、q-path、mode list | 虚频现象被定位 | 原因已判定 | 未定位为 `BLOCK` |
+| magnitude | frequency table、单位 | 可区分小数值异常和明显软模 | 小虚频一定可忽略 | 未记录单位/大小为 `WARN` |
+| eigenvector / displacement | mode output、可视化记录 | 软模物理图像可审阅 | 已证明相变路径 | 未检查 mode pattern 为 `WARN/BLOCK` |
+| convergence comparison | rerun records | 虚频对参数是否稳定 | 真实不稳定已最终证明 | 未做受控复查为 `WARN/BLOCK` |
+| upstream force/stress | relax/vc-relax/final SCF output | 排除结构未优化风险 | 消除全部模型误差 | 残余力/应力不清为 `BLOCK` |
+
+### Phonon common BLOCK triggers
+
+- 前置结构、final static SCF 或 `prefix/outdir` 为 `BLOCK`。
+- `ph.x` 关键 q point、irrep 或 perturbation 未收敛。
+- `dyn`、`flfrc`、`flfrq`、`fldos` 或 response tensors 混用不同结构、泛函、赝势、q-grid 或 ASR 设置。
+- 仅凭 Gamma phonon 进入全 Brillouin zone 稳定性结论。
+- 用 ASR、平滑 DOS 或绘图处理掩盖未排查的 acoustic 异常或 imaginary frequencies。
+- Born effective charge、dielectric tensor、IR/Raman 或 LO-TO splitting 的物理条件不满足，仍进入解释。
 
 ### 允许进入的下游
 
-- `PASS`：phonon dispersion、phonon DOS、热力学/稳定性基础分析、Born charge 或 IR/Raman 后处理。
-- `WARN`：收敛排查、ASR/q-mesh 测试、虚频来源诊断；不得作为最终动力学稳定性结论。
-- `BLOCK`：不允许进入 phonon 图件归档、稳定性声明或任何依赖力常数的下游。
+- `PASS`：phonon dispersion、phonon DOS、Born/dielectric、IR/Raman、受限热学输入或稳定性陈述。
+- `WARN`：收敛排查、ASR/q-grid 测试、虚频 triage、response tensor 敏感性测试；不得作为最终动力学稳定性或谱学结论。
+- `BLOCK`：不允许进入 phonon 图件归档、稳定性声明、热学、EPC、IR/Raman 或任何依赖力常数和 response tensor 的下游。
 
 ## Advanced
 
