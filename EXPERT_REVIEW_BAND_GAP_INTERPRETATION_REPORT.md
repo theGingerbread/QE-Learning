@@ -55,3 +55,20 @@ Validation commands were run before commit:
 - universal-parameter wording scan
 - high-risk overclaim scan for KS eigenvalue / DFT gap misuse
 - checks that both target pages retain output-review framing and `PASS / WARN / BLOCK`
+
+## Final QA Gate
+
+| Gate | Result | Evidence |
+|---|---|---|
+| Physics accuracy | PASS | KS gap, fundamental gap, optical gap and quasiparticle/excited-state boundaries are separated in both target pages. Physics QA found no BLOCK item; the one wording WARN on method choice was tightened to avoid implying a universal hybrid/GW/BSE upgrade path. |
+| Style consistency | PASS | Scope remains a localized Issue #4 slice: two content pages plus this report. Style/source QA found the changes concise and not a broad rewrite. |
+| Source boundary | PASS | No new DOI, BibTeX or invented metadata. The pages rely on existing QE INPUT references and canonical literature spine. |
+| Output-review framing | PASS | Both pages keep bands-path vs DOS uniform-mesh review, Fermi/VBM/CBM/energy-zero checks, `nbnd`, occupations/smearing and output-evidence framing. |
+| PASS/WARN/BLOCK preservation | PASS | Both target pages retain explicit `PASS / WARN / BLOCK` sections. |
+| Local links | PASS | Local Markdown link check reported `OK local markdown links checked: 139 files`. |
+| Private path / document residue | PASS | Target-file scan found no private machine paths, external document residues, or Word-source residues. |
+| Project-scope drift | PASS | Target-file scan found no unrelated tooling drift; content stays within QE-Learning band/DOS/gap interpretation. |
+| Fixed material case scan | PASS | No material-specific case examples were introduced. |
+| Universal parameter scan | PASS | No fixed cutoff, k-mesh, smearing, U, vacuum, window or other universal parameter recipe was introduced. |
+| High-risk overclaim scan | PASS | Regex hits for experimental/optical/quasiparticle gap occur in misconception, boundary or source-context wording; no positive overclaim was found. |
+| Merge recommendation | READY | No BLOCK gate remains; PR #5 is suitable to mark ready and merge after fresh validation. |

@@ -68,7 +68,7 @@ Derivative discontinuity 是 band-gap problem 的核心概念之一。精确 DFT
 
 ## 9. 与前沿常识的关系
 
-普通 DFT gap 常可作趋势；定量光谱或准粒子 gap 通常需要 hybrid、GW/BSE 或实验对照。小带隙和拓扑判断必须额外审阅 SOC、k mesh 和对称性。
+普通 DFT gap 常可作趋势；定量光谱或准粒子 gap 需要额外方法或实验对照，具体选择仍取决于体系、目标 observable 和可验证的收敛证据。小带隙和拓扑判断必须额外审阅 SOC、k mesh 和对称性。
 
 ## 10. 最低掌握深度
 
