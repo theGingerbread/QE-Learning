@@ -2,7 +2,7 @@
 
 ## 本页解决什么问题
 
-本页解释为什么 `ph.x` 是 DFPT response calculation，而不是普通后处理；并说明 Gamma phonon、q-grid phonon、`q2r.x`、`matdyn.x`、`dynmat.x`、ASR 和 imaginary frequency 在 QE output review 中如何进入 PASS / WARN / BLOCK。它直接支撑 `workflows/phonon/` 中的 Gamma、dispersion、DOS、Born/dielectric、IR/Raman 和 debugging 页面。
+本页解释 `ph.x` 作为 DFPT response calculation 如何从已审阅的 ground-state 数据生成 phonon 证据，并说明 Gamma phonon、q-grid phonon、`q2r.x`、`matdyn.x`、`dynmat.x`、ASR 和 imaginary frequency 在 QE output review 中如何进入 PASS / WARN / BLOCK。它直接支撑 `workflows/phonon/` 中的 Gamma、dispersion、DOS、Born/dielectric、IR/Raman 和 debugging 页面。
 
 ## 最低掌握深度
 
