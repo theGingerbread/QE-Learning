@@ -4,6 +4,8 @@
 
 Phase 3-A 的核心页已经与 ground-state、electronic 和 phonon 三类 workflow 建立回链：SCF、cutoff、pseudopotential、k-points、smearing、force/stress、DFPT phonon、dielectric tensor 和 Born effective charge 都应作为 output review 的理论回查层使用。
 
+v0.2 final pass 之后，本目录所有主题页都应按同一用途阅读：先给出物理图像和最低理论结构，再映射到 QE input/output、workflow downstream、常见误区、PASS / WARN / BLOCK 和来源边界。不同页面标题不必机械一致，但必须能服务计算审阅。
+
 ## 阅读方式
 
 先从 `learn/` 的能力路线进入具体 workflow，再到 `workflows/` 阅读 QE 原生命令、输入模板、output review 和 `PASS / WARN / BLOCK` 判断。读 workflow 时如果遇到参数选择、输出行含义或准入结论无法解释，再回到本目录查对应理论页。需要从“倒空间、能带、声子、赝势”等概念快速定位页面时，可使用 [HANDBOOK_INDEX.md](../HANDBOOK_INDEX.md) 的 Theory 回查路径。
