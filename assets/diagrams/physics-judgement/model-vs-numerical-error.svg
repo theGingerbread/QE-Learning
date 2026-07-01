@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="430" viewBox="0 0 1000 430" role="img" aria-labelledby="title desc">
+  <title id="title">Model and numerical error audit map</title>
+  <desc id="desc">Original QE-Learning diagram separating physical model choices, numerical representation, pseudopotential model, boundary condition, workflow data chain and post-processing interpretation.</desc>
+  <defs>
+    <style>
+      .root { fill: #eef2ff; stroke: #3730a3; stroke-width: 2; rx: 10; }
+      .layer { fill: #f8fafc; stroke: #334155; stroke-width: 1.8; rx: 10; }
+      .txt { font-family: Arial, sans-serif; fill: #0f172a; font-size: 17px; }
+      .small { font-family: Arial, sans-serif; fill: #334155; font-size: 13px; }
+      .arrow { stroke: #64748b; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#64748b" />
+    </marker>
+  </defs>
+  <rect x="375" y="25" width="250" height="70" class="root" />
+  <text x="432" y="57" class="txt">DFT/QE result</text>
+  <text x="410" y="80" class="small">audit map, not a formula</text>
+  <rect x="55" y="145" width="260" height="82" class="layer" />
+  <text x="83" y="178" class="txt">Physical model</text>
+  <text x="83" y="202" class="small">functional, U, SOC, vdW, spin</text>
+  <rect x="370" y="145" width="260" height="82" class="layer" />
+  <text x="398" y="178" class="txt">Numerical representation</text>
+  <text x="398" y="202" class="small">cutoff, k/q mesh, thresholds</text>
+  <rect x="685" y="145" width="260" height="82" class="layer" />
+  <text x="713" y="178" class="txt">Pseudopotential model</text>
+  <text x="713" y="202" class="small">valence, XC, projectors, relativity</text>
+  <rect x="55" y="285" width="260" height="82" class="layer" />
+  <text x="83" y="318" class="txt">Boundary condition</text>
+  <text x="83" y="342" class="small">cell, vacuum, dipole, finite size</text>
+  <rect x="370" y="285" width="260" height="82" class="layer" />
+  <text x="398" y="318" class="txt">Workflow data chain</text>
+  <text x="398" y="342" class="small">prefix/outdir, restart, upstream gate</text>
+  <rect x="685" y="285" width="260" height="82" class="layer" />
+  <text x="713" y="318" class="txt">Post-processing</text>
+  <text x="713" y="342" class="small">bands, DOS, PDOS, plots, interpolation</text>
+  <path d="M500 95 C430 120 270 120 185 145" class="arrow" />
+  <path d="M500 95 L500 145" class="arrow" />
+  <path d="M500 95 C570 120 730 120 815 145" class="arrow" />
+  <path d="M500 95 C400 220 270 235 185 285" class="arrow" />
+  <path d="M500 95 L500 285" class="arrow" />
+  <path d="M500 95 C600 220 730 235 815 285" class="arrow" />
+</svg>

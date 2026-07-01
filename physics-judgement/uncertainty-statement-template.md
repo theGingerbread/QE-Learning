@@ -8,6 +8,10 @@
 
 路由说明：本页是 uncertainty statement quick card；误差条、reproducibility 和 claim-strength 系统背景读 [17-uncertainty-error-bars-and-reproducibility.md](17-uncertainty-error-bars-and-reproducibility.md)，跨主题审阅清单读 [18-physics-judgement-checklist.md](18-physics-judgement-checklist.md)。
 
+![Uncertainty statement evidence chain](../assets/diagrams/physics-judgement/uncertainty-statement-chain.svg)
+
+图：uncertainty statement 应把 model、convergence evidence、output evidence 和 limitations 串成 bounded claim 与 downstream permission。该图不替代 calculation record 中的具体证据。
+
 ## 典型 output 现象
 
 | 现象 | 可能提示 | 不能直接说明什么 |
