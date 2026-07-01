@@ -6,6 +6,8 @@
 
 本页不承担完整 GW/BSE/TDDFT 教程功能；它用于防止把 ground-state workflow 输出越界解释为 quasiparticle gap、optical gap、exciton、absorption spectrum、XAS 或 EELS 结论。
 
+路由说明：本页是 excited-state boundary quick card；系统光谱和 GW/BSE 入口读 [15-spectroscopy-gw-bse-and-excited-state-boundaries.md](15-spectroscopy-gw-bse-and-excited-state-boundaries.md)，KS eigenvalue 解释边界读 [kohn-sham-eigenvalue-boundary.md](kohn-sham-eigenvalue-boundary.md)。
+
 ## 典型 output 现象
 
 | 现象 | 可能提示 | 不能直接说明什么 |
@@ -92,5 +94,6 @@
 - Kohn and Sham, *Self-Consistent Equations Including Exchange and Correlation Effects*：KS 辅助体系。
 - Kohn Nobel lecture：density-functional 方法边界。
 - Onida, Reining and Rubio, electronic excitations review：GW/BSE 与 excited-state 边界。
+- [Canonical literature](../references/canonical-literature.md)：用于回查 DFT foundations 与 excited-state / GW / BSE canonical sources。
 - [Yambo educational wiki](https://wiki.yambo-code.eu/wiki/index.php?title=Main_Page)：Yambo 学习与工具入口。
 - [workflows/electronic/bands.md](../workflows/electronic/bands.md)：本仓库 bands workflow。

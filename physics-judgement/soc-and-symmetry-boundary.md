@@ -4,6 +4,8 @@
 
 本页用于判断 SOC / noncollinear 计算是否足以支撑 band splitting、band gap、magnetic anisotropy、spin texture、degeneracy 或拓扑相关解释。SOC 是 relativistic model choice，不是普通后处理开关；启用 SOC 后，pseudopotential、symmetry、k-path、spin setting、bands、DOS、PDOS 和下游数据链都需要重新审阅。
 
+路由说明：本页是 SOC / symmetry quick card；磁性、自旋和 SOC 的系统判断读 [06-magnetism-spin-and-soc.md](06-magnetism-spin-and-soc.md)，对称性背景读 [crystal-symmetry-space-group-point-group.md](../theory-minimum/crystal-symmetry-space-group-point-group.md)。
+
 ## 典型 output 现象
 
 | output 现象 | 可能含义 | 回查动作 |

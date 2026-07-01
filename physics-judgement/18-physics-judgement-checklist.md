@@ -205,7 +205,7 @@
 
 ### BLOCK 信号
 
-- 把 DFT gap 当实验 gap
+- 把 DFT gap 当实验测得带隙
 
 ### 回查页面
 

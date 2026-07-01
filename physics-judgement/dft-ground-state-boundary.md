@@ -1,5 +1,9 @@
 # DFT Ground-State Boundary
 
+## 本页解决什么问题
+
+本页用于快速判断一个 QE 结果是否仍处在 ground-state DFT 可支持的结论范围内。更系统的 excited-state 边界请回查 [ground-state-vs-excited-state.md](ground-state-vs-excited-state.md) 和 [15-spectroscopy-gw-bse-and-excited-state-boundaries.md](15-spectroscopy-gw-bse-and-excited-state-boundaries.md)。
+
 ## 1. 核心判断结论
 
 - **Strong:** DFT 的核心对象是 ground-state density、total energy 以及由能量导数得到的 force/stress；不是所有实验谱学量。

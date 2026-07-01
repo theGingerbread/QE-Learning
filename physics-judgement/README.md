@@ -45,7 +45,7 @@
 ## 常见误区
 
 - 把数值收敛问题误判为物理效应。
-- 把泛函、DFT+U、SOC、vdW 或 hybrid 当作普适精度提升。
+- 把泛函、DFT+U、SOC、vdW 或 hybrid 当作无边界的可靠性提升。
 - 把 Kohn-Sham eigenvalue、DFT band gap 或可视化图像直接当作实验观测量。
 - 把 ASR、smearing、scissor 或后处理平滑当作替代上游收敛的修正。
 - output 只有 `JOB DONE` 就进入下游，而没有记录 warning、数据来源和 `PASS / WARN / BLOCK`。
@@ -63,6 +63,13 @@
 ## 快速判断页
 
 快速判断页用于从 output 现象直接回查物理判断边界。它们不替代编号主题页：编号页给出系统理论框架，快速判断页给出常见失败模式、`PASS / WARN / BLOCK` 边界和回查路线。维护时优先保持编号页为 canonical topic page，快速判断页只保留高密度审阅卡片和路由。
+
+| 使用场景 | 优先入口 | 维护规则 |
+|---|---|---|
+| 系统学习某个物理判断主题 | 编号主题页 `01`-`18` | 保留连续正文、物理图像、理论边界和来源脉络 |
+| 从异常 output 快速排查 | quick judgement card | 保留现象、必查 input/output、`PASS / WARN / BLOCK` 和回链 |
+| 写 calculation record 或 uncertainty statement | quick card + `standards/` | 只写可复查证据，不扩展成论文综述 |
+| 页面内容冲突 | 编号页为 canonical 解释，quick card 指回编号页 | 优先修正 quick card 的路由和边界，不复制整段正文 |
 
 - [Physics Judgement Conclusion Reference Book](CONCLUSION_REFERENCE_BOOK.md)
 - [DFT ground-state boundary](dft-ground-state-boundary.md)

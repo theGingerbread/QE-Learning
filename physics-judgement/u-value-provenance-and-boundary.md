@@ -4,6 +4,8 @@
 
 本页用于判断 DFT+U 中的 U 值是否有足够 provenance，以及能否支撑当前科研结论。DFT+U 改变的是局域子空间上的模型，不是为了让 band gap 接近预期而任意调节的数值参数。U 的解释必须绑定 projector、Hubbard manifold、pseudopotential、functional、结构状态和求取策略。
 
+路由说明：本页是 U provenance quick card；强关联与 DFT+U 的系统判断读 [05-strong-correlation-and-dft-plus-u.md](05-strong-correlation-and-dft-plus-u.md)，最低理论背景读 [magnetism-soc-dftu.md](../theory-minimum/magnetism-soc-dftu.md)。
+
 ## 典型 output 现象
 
 | output 现象 | 可能含义 | 回查动作 |
@@ -39,7 +41,7 @@
 ## 判断规则
 
 - U 作用于选定 localized manifold；没有 manifold 和 projector，U 数值本身不可解释。
-- U 不是元素常数。它依赖 projector、PP、functional、结构、局域环境、磁性状态、求取方法和是否自洽更新。相同数值的 U 若作用于不同 projector、不同 Hubbard manifold 或不同 UPF，不应视为同一模型。
+- U 不能当作只由元素决定的常数。它依赖 projector、PP、functional、结构、局域环境、磁性状态、求取方法和是否自洽更新。相同数值的 U 若作用于不同 projector、不同 Hubbard manifold 或不同 UPF，不应视为同一模型。
 - Literature U、empirical U、linear-response U、DFPT U、self-consistent U、U+V 是不同 provenance 类型。它们可以作为不同模型来源，但必须明确标注。
 - 只为了让 gap 接近某个目标而调 U，若没有模型说明和 sensitivity，不足以支撑可靠物理结论。
 - DFT+U 总能、结构、bands、phonon 或磁性比较必须在同一 U 模型和同一数据链下审阅。若 U 是 linear-response 或 DFPT 求得，还应记录求取所用结构、磁态、functional、PP 和自洽策略，避免把求取阶段与生产计算阶段切断。
@@ -79,7 +81,7 @@
 
 | 结论 | 强度 | 来源边界 |
 |---|---|---|
-| U 不是元素常数，必须绑定 projector/manifold 和 provenance | Strong | Cococcioni/de Gironcoli、Timrov/Marzari/Cococcioni |
+| U 不能当作只由元素决定的常数，必须绑定 projector/manifold 和 provenance | Strong | Cococcioni/de Gironcoli、Timrov/Marzari/Cococcioni |
 | `HUBBARD` card 和 `hp.x` 输入语法需查当前 QE 文档 | Version-sensitive | QE `INPUT_PW`、Hubbard input guide、HP docs |
 | 用 U 拟合 gap 需要模型边界 | Boundary | DFT+U 方法文献与 band-gap judgement |
 | DFT+U 结果应写 model sensitivity | Moderate | DFT error / reproducibility literature |

@@ -6,6 +6,8 @@
 
 表面、界面和低维模型中，能量零点、真空平台、偶极、表面终止、Fermi level、slab 厚度、vacuum 区域和 smearing 都可能改变结论。若这些边界没有记录，数值结果只能作为未完成审阅的中间量。
 
+路由说明：本页是 work-function / electrostatic quick card；表面、界面和静电势系统背景读 [11-surfaces-interfaces-and-electrostatics.md](11-surfaces-interfaces-and-electrostatics.md)。
+
 ## 典型 output 现象
 
 | 现象 | 可能提示 | 不能直接说明什么 |

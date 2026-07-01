@@ -54,7 +54,7 @@ Derivative discontinuity 是 band-gap problem 的核心概念之一。精确 DFT
 |---|---|---|
 | PASS | 已明确这是 DFT-level / KS-level gap 或 metallicity statement；bands path、DOS uniform mesh、`nbnd`、Fermi level、VBM/CBM、energy zero、SOC/smearing 和模型边界均可复查 | 进入带边界的带隙趋势、相对比较或 workflow 交叉解释 |
 | WARN | gap 对 k mesh、SOC、泛函、U、smearing、`nbnd` 或 path 覆盖敏感；缺少 GW/BSE/实验对照 | 只作为趋势、筛选或内部判断 |
-| BLOCK | 把普通 DFT KS gap 当定量实验 gap、quasiparticle gap 或 optical gap；用 bands path 漏采样结果直接下结论；energy zero 不明 | 停止正式 gap 解释 |
+| BLOCK | 把普通 DFT KS gap 当定量实验测得带隙、quasiparticle gap 或 optical gap；用 bands path 漏采样结果直接下结论；energy zero 不明 | 停止正式 gap 解释 |
 
 ## 8. 常见误区
 

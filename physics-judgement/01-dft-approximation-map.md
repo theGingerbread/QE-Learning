@@ -102,7 +102,7 @@ DFT/QE 的误差可以按处理方式分层：
 - 把 cutoff 加大当作解决所有误差的方法。
 - 换泛函、赝势、U、SOC 或 vdW 后沿用旧结构和旧收敛记录。
 - 只看总能收敛，不检查 force、stress、phonon 或 response。
-- 把 Kohn-Sham gap 当实验 gap。
+- 把 Kohn-Sham gap 当实验测得带隙。
 - 把 ASR 当作 phonon 收敛测试替代品。
 - 把 work function 写成公式后不检查真空电势平台。
 - 用 AiiDA、脚本或后处理图像替代 output review。

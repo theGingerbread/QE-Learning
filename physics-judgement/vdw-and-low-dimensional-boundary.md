@@ -6,6 +6,8 @@
 
 vdW 与低维问题容易把模型误差、边界条件误差和数值收敛误差混在一起。层间距、吸附能、表面电势、work function、phonon soft mode 和能带变化都可能来自物理弱相互作用，也可能来自真空、偶极、cell 约束或下游文件链不一致。vdW 修正改变的是能量面和结构响应；低维边界改变的是周期镜像、长程静电和电势参考。二者常耦合，但不能互相替代审阅。
 
+路由说明：本页是 vdW / low-dimensional quick card；非局域相互作用系统背景读 [07-van-der-waals-and-nonlocal-interactions.md](07-van-der-waals-and-nonlocal-interactions.md)，有限尺寸和维度边界读 [12-finite-size-boundary-and-dimensionality.md](12-finite-size-boundary-and-dimensionality.md)。
+
 ## 典型 output 现象
 
 | 现象 | 可能提示 | 不能直接说明什么 |
