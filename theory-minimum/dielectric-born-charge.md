@@ -19,7 +19,7 @@
 
 Dielectric tensor 描述电子和离子系统对宏观电场的线性响应。Born effective charge 描述某个原子沿某方向位移时，宏观极化如何变化。它是动态响应量，包含成键和电子重排信息，因此不能解释为静态离子价。一个形式电荷相同的原子，在不同结构、泛函、赝势或局域环境下可以有不同的 Born effective charge。
 
-LO-TO splitting 来自长程电场的 non-analytic contribution：同样接近 Gamma 点，纵向和横向扰动的电场边界不同，频率可以分裂。QE 中 `epsil=.true.`、Born charge、dielectric tensor、`dynmat.x` 或 `matdyn.x` 的 non-analytic 设置共同决定这个解释是否成立。
+LO-TO splitting 来自长程电场的 non-analytic contribution：同样接近 Gamma 点，纵向和横向扰动的电场边界不同，频率可以分裂。QE 中 `epsil=.true.`、Born charge、dielectric tensor、`dynmat.x` 或 `matdyn.x` 的 non-analytic 设置共同决定这个解释是否成立。这里的关键条件是绝缘体线性响应：若体系有金属性、部分占据或小带隙导致电场响应定义不清，Born/dielectric 输出即使出现，也不能按普通极性绝缘体解释。
 
 ## 最低数学结构
 
@@ -31,6 +31,8 @@ epsilon  ~  dP / dE
 ```
 
 这些导数来自线性响应。它们进入长波极限 dynamical matrix 的 non-analytic 项，影响 polar phonon、LO-TO splitting 和 IR activity。因为响应量依赖 band gap、occupation、pseudopotential、functional 和 structure，output review 需要检查的不只是张量数值，还包括适用条件、收敛、对称性和文件链。
+
+Born effective charge 还应与平移和电荷中性条件相容。实际 output 中若同类原子张量、总和规则或对称性关系明显异常，可能是真实强极化响应，也可能是结构、赝势、k mesh、occupation、`epsil` 分支或 response convergence 的问题。最低审阅要求不是“数值看起来大或小”，而是能说明张量是否与当前结构对称性、绝缘体条件和文件链一致。
 
 ## QE 中的对应对象
 
@@ -64,6 +66,7 @@ epsilon  ~  dP / dE
 | dielectric tensor | 介电响应张量输出完整 | 张量已对所有数值参数收敛 |
 | Born charge tensors | 每个原子动态有效电荷输出 | 等于静态价态 |
 | tensor symmetry | 与结构对称性是否一致 | 异常一定是物理效应 |
+| charge-neutrality / sum-rule consistency | Born tensors 是否满足基本响应约束 | 异常可直接解释为材料特性 |
 | perturbation convergence | response 方程完成 | functional/PP/model error 已消除 |
 | warnings | 金属、symmetry、收敛或电场问题 | warning 可忽略 |
 | non-analytic chain | LO-TO 文件链可追踪 | splitting 可无边界解释 |
