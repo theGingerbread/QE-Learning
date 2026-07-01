@@ -1,5 +1,9 @@
 # Imaginary Frequency Triage
 
+## 本页解决什么问题
+
+本页用于快速判断 phonon imaginary frequency 应优先按数值误差、结构问题、q-grid / ASR 边界，还是真实软模不稳定来排查。声子软模的系统物理判断读 [09-phonons-soft-modes-and-dynamical-stability.md](09-phonons-soft-modes-and-dynamical-stability.md)，操作化排查读 [phonon-debugging.md](../workflows/phonon/phonon-debugging.md)。
+
 ## 1. 核心判断结论
 
 - **Strong:** phonon 虚频至少分为数值误差、结构未充分优化、真实动力学不稳定三类。

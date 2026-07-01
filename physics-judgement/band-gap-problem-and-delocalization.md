@@ -4,6 +4,8 @@
 
 本页用于判断为什么 DFT band gap 是高风险结论。普通 bands/DOS workflow 给出的是 Kohn-Sham-level gap 或 Fermi-level crossing 证据；它可以服务趋势、模型对照和内部电子结构判断，但不能自动支撑准粒子、光学、输运或器件级结论。
 
+路由说明：本 quick card 用于 output-driven gap 审阅；系统解释优先读 [04-band-gap-problem-and-derivative-discontinuity.md](04-band-gap-problem-and-derivative-discontinuity.md)，KS eigenvalue 边界读 [kohn-sham-eigenvalue-boundary.md](kohn-sham-eigenvalue-boundary.md)，激发态边界读 [ground-state-vs-excited-state.md](ground-state-vs-excited-state.md) 和 [15-spectroscopy-gw-bse-and-excited-state-boundaries.md](15-spectroscopy-gw-bse-and-excited-state-boundaries.md)。
+
 ## 典型 output 现象
 
 | output 现象 | 可能含义 | 回查动作 |

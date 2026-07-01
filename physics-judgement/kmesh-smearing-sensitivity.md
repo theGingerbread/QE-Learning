@@ -1,5 +1,9 @@
 # K-Mesh and Smearing Sensitivity
 
+## 本页解决什么问题
+
+本页用于快速判断 k mesh、smearing、degauss 和 Fermi-level 附近积分是否足以支撑当前 SCF、DOS、Fermi surface、phonon 或 EPC 结论。金属和 smearing 的系统判断读 [08-metals-fermi-surface-and-smearing.md](08-metals-fermi-surface-and-smearing.md)，倒空间采样背景读 [kpoints-symmetry-kpath.md](../theory-minimum/kpoints-symmetry-kpath.md)。
+
 ## 1. 核心判断结论
 
 - **Strong:** SCF uniform k mesh、DOS dense mesh、bands path 是不同对象。

@@ -6,6 +6,8 @@
 
 不确定性说明不是空泛免责声明。它应告诉读者哪些误差已经通过收敛测试降低，哪些来自模型选择，哪些来自边界条件或后处理，哪些仍然限制结论强度。
 
+路由说明：本页是 uncertainty statement quick card；误差条、reproducibility 和 claim-strength 系统背景读 [17-uncertainty-error-bars-and-reproducibility.md](17-uncertainty-error-bars-and-reproducibility.md)，跨主题审阅清单读 [18-physics-judgement-checklist.md](18-physics-judgement-checklist.md)。
+
 ## 典型 output 现象
 
 | 现象 | 可能提示 | 不能直接说明什么 |
@@ -50,7 +52,7 @@
 | 证据状态 | 推荐写法 | 避免写法 |
 |---|---|---|
 | PASS，目标 observable 已收敛且模型边界清楚 | “在 `<model>` 和 `<convergence evidence>` 下，结果支持 `<bounded claim>`。” | “DFT 证明……” |
-| PASS，但模型本身有已知边界 | “该结论是 `<DFT-level / harmonic / KS-level>` 层级判断。” | “与实验完全一致。” |
+| PASS，但模型本身有已知边界 | “该结论是 `<DFT-level / harmonic / KS-level>` 层级判断。” | “不说明误差范围的实验一致性宣称。” |
 | WARN，缺少部分敏感性或对照 | “当前结果提示 `<trend>`，仍需 `<missing check>` 后才能定量化。” | “该性质已经确定。” |
 | BLOCK，关键文件链或 output 证据缺失 | “当前输出不能支撑 `<claim>`，原因是 `<missing evidence>`。” | “结果仅供参考但仍给最终数值。” |
 
@@ -68,9 +70,9 @@
 
 - 避免写“DFT 证明……”，除非后面明确计算层级和模型边界。
 - 避免写“该体系一定……”，应说明模型、温度、压力、结构和方法范围。
-- 避免写“计算结果与实验完全一致……”，应说明比较对象和不确定性。
+- 避免写“计算结果已经等同实验观测……”，应说明比较对象、误差范围和不确定性。
 - 避免写“该参数已经足够……”，除非有目标 observable 的 convergence evidence。
-- 避免用 `JOB DONE`、平滑图像、small spread、单个 `lambda` 或单点 total energy 替代完整证据。
+- 避免用 `JOB DONE`、平滑图像、较小 spread 指标、单个 `lambda` 或单点 total energy 替代完整证据。
 
 ## 下游影响
 

@@ -6,6 +6,8 @@
 
 核心审阅问题是：所选 projection、frozen window、outer window、disentanglement 和 spin/SOC 数据链，是否能在目标能区复现 QE ab initio bands，并满足下游 observable 的精度要求。
 
+路由说明：本页是 Wannier validation quick card；Wannier 化与有效模型的系统判断读 [13-wannierization-and-effective-model-thinking.md](13-wannierization-and-effective-model-thinking.md)，EPC 下游边界读 [epc-data-chain-and-convergence.md](epc-data-chain-and-convergence.md)。
+
 ## 典型 output 现象
 
 | 现象 | 可能提示 | 不能直接说明什么 |
@@ -93,4 +95,5 @@
 - Marzari and Vanderbilt, maximally localized Wannier functions：MLWF 基础。
 - Souza, Marzari and Vanderbilt, disentanglement for entangled bands：window 与子空间选择。
 - Marzari et al., Wannier functions review：Wannier interpolation 与应用边界。
+- [Canonical literature](../references/canonical-literature.md)：用于回查 Wannier canonical source spine。
 - [workflows/advanced/wannier90-overview.md](../workflows/advanced/wannier90-overview.md)：本仓库 Wannier 边界页。

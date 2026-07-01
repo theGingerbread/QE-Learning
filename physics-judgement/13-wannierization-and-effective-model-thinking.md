@@ -96,3 +96,4 @@ Wannier 是有效模型入口，不是自动真值。Berry curvature、transport
 
 - [Wannier90 documentation](https://wannier.org/)
 - [QE INPUT_PW](https://www.quantum-espresso.org/Doc/INPUT_PW.html)
+- [Canonical literature](../references/canonical-literature.md)：用于回查 MLWF、entangled-band disentanglement 和 Wannier review 文献。

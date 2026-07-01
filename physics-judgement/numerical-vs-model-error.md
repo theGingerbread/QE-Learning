@@ -1,5 +1,9 @@
 # Numerical vs Model Error
 
+## 本页解决什么问题
+
+本页用于快速判断异常结果应回到数值收敛、模型选择、赝势、边界条件还是 workflow 数据链排查。系统误差地图读 [01-dft-approximation-map.md](01-dft-approximation-map.md)，具体 workflow gate 回到 [output-review-checklist.md](../standards/output-review-checklist.md)。
+
 ## 1. 核心判断结论
 
 - **Strong:** cutoff、k/q mesh、SCF threshold、smearing 属于 numerical convergence 问题。

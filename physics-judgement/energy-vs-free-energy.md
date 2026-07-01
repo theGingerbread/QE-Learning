@@ -6,6 +6,8 @@
 
 本页不承担热力学教程功能；它帮助用户决定当前 QE output 能支持 0 K electronic energy statement，还是需要 phonon/QHA/MD/free-energy 方法补充。
 
+路由说明：本页是 energy/free-energy quick card；热力学、自由能和 MD 的系统边界读 [16-thermodynamics-free-energy-and-md-boundaries.md](16-thermodynamics-free-energy-and-md-boundaries.md)。
+
 ## 典型 output 现象
 
 | 现象 | 可能提示 | 不能直接说明什么 |

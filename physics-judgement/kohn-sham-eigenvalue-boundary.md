@@ -4,6 +4,8 @@
 
 本页用于判断 QE 输出的 Kohn-Sham eigenvalues 可以如何使用，以及不能如何解释。`pw.x`、`bands.x`、`dos.x` 和 `projwfc.x` 产生的电子结构图对 workflow 审阅、趋势分析和态成分判断很有用，但它们来自 Kohn-Sham auxiliary system，不应无条件写成 quasiparticle excitation、optical spectrum 或实验能级。
 
+路由说明：本页是 eigenvalue 解释边界 quick card；带隙误差的系统物理图像读 [04-band-gap-problem-and-derivative-discontinuity.md](04-band-gap-problem-and-derivative-discontinuity.md)，ordinary DFT 与 excited-state 方法的边界读 [ground-state-vs-excited-state.md](ground-state-vs-excited-state.md) 和 [15-spectroscopy-gw-bse-and-excited-state-boundaries.md](15-spectroscopy-gw-bse-and-excited-state-boundaries.md)。
+
 ## 典型 output 现象
 
 | output 现象 | 可能含义 | 回查动作 |

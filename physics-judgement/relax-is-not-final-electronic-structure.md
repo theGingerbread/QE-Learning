@@ -1,5 +1,9 @@
 # Relax Is Not Final Electronic Structure
 
+## 本页解决什么问题
+
+本页用于快速判断 relax / vc-relax 输出是否可以作为下游电子结构、phonon 或 response workflow 的上游。结构优化的最低理论背景读 [force-stress-relaxation.md](../theory-minimum/force-stress-relaxation.md)，workflow 操作回到 [relax.md](../workflows/ground-state/relax.md) 和 [vc-relax.md](../workflows/ground-state/vc-relax.md)。
+
 ## 1. 核心判断结论
 
 - **Strong:** relax/vc-relax 是结构优化 workflow，不是最终 bands/DOS/phonon 结论。
