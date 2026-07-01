@@ -8,7 +8,7 @@
 
 ## 阅读方式
 
-如果 output 中出现虚频、带隙异常、磁矩异常、DOS 与 bands 不一致、SCF 振荡、work function 不稳定、Born charge 不合理，不应只调参数。先确认 workflow 记录完整，再回到本目录查可能的物理原因：泛函、赝势、边界条件、维度、smearing、SOC、DFT+U、vdW、DFPT 响应或后处理近似。
+如果 output 中出现虚频、带隙异常、磁矩异常、DOS 与 bands 不一致、SCF 振荡、work function 不稳定、Born charge 不合理，不应只调参数。先确认 workflow 记录完整，再回到本目录查可能的物理原因：泛函、赝势、边界条件、维度、smearing、SOC、DFT+U、vdW、DFPT 响应或后处理近似。需要从异常现象快速定位入口时，可使用 [HANDBOOK_INDEX.md](../HANDBOOK_INDEX.md) 的 Physics Judgement 路径。
 
 建议按现象回查：
 
