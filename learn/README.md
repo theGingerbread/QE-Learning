@@ -4,7 +4,7 @@
 
 ## 阅读方式
 
-先读 `learn/`，用每一页建立问题框架、术语边界和判断标准；再读 `workflows/`，把同一阶段对应到 QE 原生命令、input/output 和可靠性检查。`theory-minimum/` 用于回查最低理论，`physics-judgement/` 用于解释结果可信度，`standards/` 用于把学习过程写成可复查记录。
+先读 `learn/`，用每一页建立问题框架、术语边界和判断标准；如果需要从具体问题反查页面，可先用 [HANDBOOK_INDEX.md](../HANDBOOK_INDEX.md) 定位入口。再读 `workflows/`，把同一阶段对应到 QE 原生命令、input/output 和可靠性检查。`theory-minimum/` 用于回查最低理论，`physics-judgement/` 用于解释结果可信度，`standards/` 用于把学习过程写成可复查记录。
 
 推荐每个阶段都按同一轮次阅读：
 

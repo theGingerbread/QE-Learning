@@ -6,7 +6,7 @@ Phase 3-A 的核心页已经与 ground-state、electronic 和 phonon 三类 work
 
 ## 阅读方式
 
-先从 `learn/` 的能力路线进入具体 workflow，再到 `workflows/` 阅读 QE 原生命令、输入模板、output review 和 `PASS / WARN / BLOCK` 判断。读 workflow 时如果遇到参数选择、输出行含义或准入结论无法解释，再回到本目录查对应理论页。
+先从 `learn/` 的能力路线进入具体 workflow，再到 `workflows/` 阅读 QE 原生命令、输入模板、output review 和 `PASS / WARN / BLOCK` 判断。读 workflow 时如果遇到参数选择、输出行含义或准入结论无法解释，再回到本目录查对应理论页。需要从“倒空间、能带、声子、赝势”等概念快速定位页面时，可使用 [HANDBOOK_INDEX.md](../HANDBOOK_INDEX.md) 的 Theory 回查路径。
 
 理论页只作为 workflow 的回查层使用：
 

@@ -28,7 +28,7 @@ structure + pseudopotential
 
 ## 使用方式
 
-从 [learn/00-start-here.md](learn/00-start-here.md) 开始，先建立 QE 原生命令行 workflow 的整体图景，再进入 [workflows/](workflows/) 阅读具体计算步骤。遇到最低理论概念时查 [theory-minimum/](theory-minimum/)，需要解释物理近似和失败模式时查 [physics-judgement/](physics-judgement/)，需要外部资料时查 [references/](references/)，每次学习或计算记录按 [standards/](standards/) 执行。读完页面只代表完成阅读，是否掌握需要由 output review、收敛记录和 `PASS / WARN / BLOCK` 判断来证明。
+需要按问题快速查阅时，先看 [HANDBOOK_INDEX.md](HANDBOOK_INDEX.md)。从 [learn/00-start-here.md](learn/00-start-here.md) 开始，先建立 QE 原生命令行 workflow 的整体图景，再进入 [workflows/](workflows/) 阅读具体计算步骤。遇到最低理论概念时查 [theory-minimum/](theory-minimum/)，需要解释物理近似和失败模式时查 [physics-judgement/](physics-judgement/)，需要外部资料时查 [references/](references/)，每次学习或计算记录按 [standards/](standards/) 执行。读完页面只代表完成阅读，是否掌握需要由 output review、收敛记录和 `PASS / WARN / BLOCK` 判断来证明。
 
 ## 边界说明
 
