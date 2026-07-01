@@ -24,6 +24,10 @@ DFT result
 
 这只是用于审阅的分类图，不是严格数学分解。它的价值在于让异常 output 有明确回查路径：SCF 振荡优先回到 occupation、mixing、structure、PP 和 k mesh；band gap 异常需要同时看 functional、SOC、U、k path、DOS mesh 和 KS eigenvalue 边界；phonon 虚频需要检查结构、force/stress、SCF、q-grid、ASR 和 mode eigenvector；work function 漂移则需要回到 slab、vacuum、dipole 和 electrostatic potential plateau。
 
+![Model and numerical error audit map](../assets/diagrams/physics-judgement/model-vs-numerical-error.svg)
+
+图：DFT/QE 结果审阅应同时分离 physical model、numerical representation、pseudopotential model、boundary condition、workflow data chain 和 post-processing interpretation。该图是审阅地图，不是严格误差公式。
+
 DFT/QE 的主要近似层次包括：
 
 - Born-Oppenheimer 图像：电子和原子核运动分离，许多 QE workflow 默认在给定原子结构上求电子基态。

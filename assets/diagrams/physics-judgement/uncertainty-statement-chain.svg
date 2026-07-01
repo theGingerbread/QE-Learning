@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="330" viewBox="0 0 1040 330" role="img" aria-labelledby="title desc">
+  <title id="title">Uncertainty statement evidence chain</title>
+  <desc id="desc">Original QE-Learning diagram showing how model, convergence evidence, output evidence and limitations become a bounded uncertainty statement and downstream permission.</desc>
+  <defs>
+    <style>
+      .box { fill: #f8fafc; stroke: #334155; stroke-width: 1.8; rx: 10; }
+      .claim { fill: #ecfeff; stroke: #0891b2; stroke-width: 2; rx: 10; }
+      .txt { font-family: Arial, sans-serif; fill: #0f172a; font-size: 16px; }
+      .small { font-family: Arial, sans-serif; fill: #334155; font-size: 12.5px; }
+      .arrow { stroke: #64748b; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#64748b" />
+    </marker>
+  </defs>
+  <rect x="30" y="55" width="155" height="82" class="box" />
+  <text x="55" y="88" class="txt">Model</text>
+  <text x="55" y="113" class="small">functional, PP, U, SOC</text>
+  <rect x="230" y="55" width="170" height="82" class="box" />
+  <text x="254" y="88" class="txt">Convergence</text>
+  <text x="254" y="113" class="small">cutoff, k/q mesh, thresholds</text>
+  <rect x="445" y="55" width="170" height="82" class="box" />
+  <text x="469" y="88" class="txt">Output evidence</text>
+  <text x="469" y="113" class="small">warnings, forces, tensors, files</text>
+  <rect x="660" y="55" width="160" height="82" class="box" />
+  <text x="684" y="88" class="txt">Limitations</text>
+  <text x="684" y="113" class="small">model and boundary risks</text>
+  <rect x="865" y="45" width="145" height="102" class="claim" />
+  <text x="889" y="78" class="txt">Bounded claim</text>
+  <text x="889" y="103" class="small">claim strength</text>
+  <text x="889" y="123" class="small">downstream allowed</text>
+  <path d="M185 96 L230 96" class="arrow" />
+  <path d="M400 96 L445 96" class="arrow" />
+  <path d="M615 96 L660 96" class="arrow" />
+  <path d="M820 96 L865 96" class="arrow" />
+  <rect x="245" y="205" width="550" height="58" class="box" />
+  <text x="284" y="239" class="txt">Uncertainty statement: what was checked, what remains bounded, what may go downstream</text>
+  <path d="M520 137 L520 205" class="arrow" />
+</svg>
