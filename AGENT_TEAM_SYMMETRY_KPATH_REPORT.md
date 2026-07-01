@@ -8,7 +8,7 @@ This PR is the Batch B topic-pack for Issue #4. It refines only the reciprocal-s
 - `theory-minimum/crystal-symmetry-space-group-point-group.md`
 - `theory-minimum/kpoints-symmetry-kpath.md`
 
-Preflight found `main` and `origin/main` at the same commit. PR #5 for band-structure / band-gap interpretation is still open, so this branch does not edit the two PR #5 pages.
+Preflight found `main` and `origin/main` at the same commit when this branch was created. Before final QA, PR #5 for band-structure / band-gap interpretation was merged into `main`, and this branch was updated from `origin/main` without conflicts. This PR still does not edit the two PR #5 target pages.
 
 ## Subagents Used
 
@@ -86,8 +86,25 @@ Validation commands were run after integration:
 
 - This PR does not add a full group-theory derivation; the pages remain theory-minimum references for QE input/output review.
 - External QE and SeeK-path pages were not live-revalidated in this PR; the existing source spine remains the authority for source maintenance.
-- PR #5 is still open for band-structure and band-gap pages, so this branch intentionally avoids those files.
+- PR #5 has already merged the band-structure and band-gap pages, so this branch intentionally remains scoped to reciprocal-space, symmetry and k-path pages.
 
 ## Merge Recommendation
 
 Ready for draft PR review after final command validation. The diff is scoped to three theory-minimum pages plus this report.
+
+## Final QA Gate
+
+| Gate | Result | Evidence |
+|---|---|---|
+| Physics accuracy | PASS | The pages distinguish full mesh, shift flags, irreducible representatives and weights; separate space group, point group and little group; and keep little-group labels tied to the current k/q point and Hamiltonian branch. |
+| Style consistency | PASS | The three pages use positive definitions, physical-picture prose and compact review tables without turning into a broad group-theory derivation. |
+| Source boundary | PASS | Source use remains within QE official INPUT/program docs, Monkhorst-Pack for integration meshes and SeeK-path only as a path-provenance helper. No new DOI or BibTeX metadata was added. |
+| Output-review framing | PASS | The pages specify output evidence for full mesh, shift, weights, irreducible k-points, symmetry summaries, bands path sequence and `filband.rap` classification. |
+| PASS/WARN/BLOCK preservation | PASS | All three target pages contain explicit PASS/WARN/BLOCK or equivalent judgement gates. |
+| Local links | PASS | Full local Markdown link check passed after updating from `origin/main`. |
+| Private path / document residue | PASS | Target-file scan found no private machine paths or external document residues. |
+| Project-scope drift | PASS | Target-file scan found no unrelated tooling drift; content stays within QE-Learning theory-minimum scope. |
+| Fixed material case scan | PASS | No material-specific case examples were introduced. |
+| Universal parameter scan | PASS | No fixed k-mesh, shift, cutoff, smearing or other universal parameter recipe was introduced. |
+| High-risk overclaim scan | PASS | Path-as-DOS/BZ-integration, irreducible-points-as-full-mesh, and `filband.rap`-as-proof overclaims are explicitly blocked or framed as misconceptions. |
+| Merge recommendation | READY | No BLOCK gate remains; PR #6 is suitable to mark ready and merge after final GitHub mergeability check. |
