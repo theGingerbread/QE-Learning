@@ -44,7 +44,7 @@
 - 程序完成但电子收敛较慢、接近最大 iteration，或 convergence 余量很小。
 - smearing、k-points、cutoff 或混合参数只适合探索，尚无收敛测试。
 - output 出现可解释 warning，但不直接破坏当前目标。
-- 金属/绝缘体占据特征与预期不完全一致，需要后续确认。
+- 金属/绝缘体占据特征与预期存在差异，需要后续确认。
 - 自旋或对称性结果可疑，但当前只用于参数摸底。
 
 ### BLOCK 触发
@@ -161,7 +161,7 @@
 
 ### 允许进入的下游
 
-- `PASS`：final static SCF、NSCF、bands、DOS、PDOS、pp.x、phonon 前置结构。
+- `PASS`：允许作为 final static SCF 的结构输入，或作为结构 handoff 进入记录；NSCF、bands、DOS、PDOS、pp.x、phonon、work function 和 advanced workflow 仍需 final static SCF 达到 `PASS`。
 - `WARN`：继续 relax、调整优化参数、粗略结构筛选；不得进入最终 phonon 或高精度性质计算。
 - `BLOCK`：不允许进入任何依赖平衡结构的下游。
 
@@ -202,7 +202,7 @@
 
 ### 允许进入的下游
 
-- `PASS`：final static SCF、NSCF、bands、DOS、PDOS、phonon、应力敏感后处理。
+- `PASS`：允许作为 final static SCF 的 cell + coordinates 输入，或作为结构/cell handoff 进入记录；NSCF、bands、DOS、PDOS、phonon 和应力敏感后处理仍需 final static SCF 达到 `PASS`。
 - `WARN`：继续 vc-relax、参数收敛排查、结构趋势探索；不得作为最终相稳定性或声子依据。
 - `BLOCK`：不允许进入依赖平衡晶胞和结构的下游。
 
@@ -235,7 +235,7 @@ relax/vc-relax 的 output 是结构优化记录，不应直接替代基于最终
 | 上游读取 | `pw.bands` output、`prefix/outdir`、SCF record | bands 数据来自目标 SCF | SCF 已对所有性质收敛 | `prefix/outdir` 错配为 `BLOCK` |
 | k-path | `K_POINTS` echo、路径来源记录、k 点数量 | 路径和标签可复查 | 路径一定符合当前结构标准化 | cell convention 不一致为 `BLOCK` |
 | band 数量 | number of Kohn-Sham states、`nbnd` | 目标能区是否被覆盖 | 高能或激发态性质已经可靠 | 目标能区缺 bands 为 `BLOCK` |
-| energy reference | Fermi energy、VBM/CBM、绘图脚本 | 图中零点可追踪 | DFT gap 等于实验 gap | energy zero 不明为 `BLOCK` |
+| energy reference | Fermi energy、VBM/CBM、绘图脚本 | 图中零点可追踪 | DFT gap 已达到实验测量层级 | energy zero 不明为 `BLOCK` |
 | `bands.x` 产物 | `filband`、`filband.gnu`、`filband.rap` | 绘图文件来自当前计算 | 图像解释已经成立 | 文件缺失或 warning 未解释为 `BLOCK` |
 | spin/SOC/symmetry | output 中 spin、SOC、noncollinear、symmetry 信息 | 图例和分支与模型一致 | 简并、拓扑或劈裂结论自动成立 | 分支标签不清为 `WARN` |
 
@@ -278,7 +278,7 @@ relax/vc-relax 的 output 是结构优化记录，不应直接替代基于最终
 | k-points | NSCF k-point summary | BZ 积分网格可复查 | 峰位已定量可信 | mesh 过稀用于定量为 `WARN/BLOCK` |
 | broadening / method | `dos.x` input、`bz_sum`、`degauss` | DOS 展宽和求和方法可复查 | 曲线平滑代表物理精度 | 未记录 broadening 为 `WARN` |
 | energy grid | `fildos`、`Emin/Emax/DeltaE` | 能量窗口和步长可复查 | 窗口外结论可靠 | 目标能区缺失为 `BLOCK` |
-| Fermi reference | SCF/NSCF output、plot script | 能量零点来源明确 | DFT gap 可直接当实验 gap | Fermi/VBM/CBM 混乱为 `BLOCK` |
+| Fermi reference | SCF/NSCF output、plot script | 能量零点来源明确 | DFT gap 可直接当实验测量层级结论 | Fermi/VBM/CBM 混乱为 `BLOCK` |
 | bands 对照 | bands output、DOS near Fermi level | 金属性或 gap 趋势可交叉审阅 | 模型误差已消除 | DOS 与 bands 冲突未解释为 `WARN/BLOCK` |
 
 ### WARN 触发
@@ -326,7 +326,7 @@ relax/vc-relax 的 output 是结构优化记录，不应直接替代基于最终
 ### WARN 触发
 
 - 投影标签复杂或存在简并/混合，需要人工解释。
-- PDOS 与 DOS 不完全一致，但差异可能来自投影定义、能量网格或 broadening。
+- PDOS 与 DOS 存在差异，但差异可能来自投影定义、能量网格或 broadening。
 - band 数量、能量窗口或 k-mesh 对高能投影余量不足。
 - spin/SOC 分量可读但尚未完成图例和通道命名核对。
 
@@ -427,7 +427,7 @@ relax/vc-relax 的 output 是结构优化记录，不应直接替代基于最终
 - bands/DOS/PDOS/pp.x 读取的 `prefix/outdir` 与上游 SCF/NSCF 不一致。
 - 用 high-symmetry bands path 结果支撑 DOS、PDOS 或 Fermi surface。
 - energy zero、Fermi level、VBM/CBM 或 vacuum level 未记录却给定量结论。
-- 把 semilocal DFT band gap 写成实验 gap 或 quasiparticle gap。
+- 把 semilocal DFT band gap 写成实验测量层级带隙或 quasiparticle gap。
 - 把 DOS 平滑程度、PDOS 投影强度、ELF 图像或 BXSF 可视化当作单独物理证明。
 - work function 缺少真空平台、Fermi energy 或同一数据链证据。
 - 上游 SCF/NSCF 为 `BLOCK`，但仍进入电子结构或后处理解释。
@@ -520,9 +520,10 @@ relax/vc-relax 的 output 是结构优化记录，不应直接替代基于最终
 
 ### 允许进入的下游
 
-- `PASS`：phonon dispersion、phonon DOS、Born/dielectric、IR/Raman、受限热学输入或稳定性陈述。
+- `PASS`：只允许进入已完成审阅的 phonon 链条对应下游。Gamma phonon `PASS` 只支持 zone-center 模式和 IR/Raman 前置；q-grid + q2r + matdyn 链条 `PASS` 才能支持 dispersion / phonon DOS；进入热学、EPC 或稳定性陈述还需对应 q-grid、imaginary-frequency triage 和 source boundary 通过。
 - `WARN`：收敛排查、ASR/q-grid 测试、虚频 triage、response tensor 敏感性测试；不得作为最终动力学稳定性或谱学结论。
 - `BLOCK`：不允许进入 phonon 图件归档、稳定性声明、热学、EPC、IR/Raman 或任何依赖力常数和 response tensor 的下游。
+
 
 ## Advanced
 
@@ -556,3 +557,10 @@ relax/vc-relax 的 output 是结构优化记录，不应直接替代基于最终
 - `PASS`：对应高级 workflow 的下一步分析、图件、复现实验或与基础结果交叉检查。
 - `WARN`：教程复现、参数敏感性测试、debugging、来源补充；不得进入最终科研结论。
 - `BLOCK`：不允许进入高级分析、图件归档、论文级结论或进一步自动化。
+
+## 资料来源
+
+- [pass-warn-block.md](pass-warn-block.md)：定义 `PASS / WARN / BLOCK` 的下游准入语义；不替代具体 workflow 的 output 证据。
+- [calculation-record-template.md](calculation-record-template.md)：定义如何把本 checklist 的检查结果写入 record；不保存实际大型 scratch 数据。
+- [references/source-index.md](../references/source-index.md)：提供 QE official `INPUT_*`、package docs、tool docs 和 canonical literature 入口；不替代当前 output review。
+- QE official `INPUT_*` references：用于核对字段和程序行为；不能单独证明目标物理量可信。

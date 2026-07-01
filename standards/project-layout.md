@@ -1,6 +1,6 @@
 # QE Project Layout
 
-这是个人计算项目建议结构，不是本仓库目录结构。本仓库只保存学习笔记和规范，不要求保存具体材料体系的 input/output、scratch 或结果文件。
+这是个人计算项目建议结构，不是本仓库目录结构。本仓库只保存学习笔记和规范，不要求保存材料专属体系的 input/output、scratch 或结果文件。
 
 该结构适合放在个人计算工作区、课题目录或集群同步目录中，用于把结构来源、赝势来源、输入输出、脚本、记录、图像和临时 scratch 数据分开。目标是让每次计算都能通过 record 找回关键证据、运行环境和下游依赖，而不要求长期保存所有 QE 生成文件。
 
@@ -20,7 +20,7 @@
   references/
 ```
 
-这是建议模板，可以按实际项目缩减或增加子目录。目录名保持通用含义，不应依赖某个具体材料案例。
+这是建议模板，可以按实际项目缩减或增加子目录。目录名保持通用含义，不应依赖某个材料专属算例。
 
 ## 2. 各目录保存什么
 
@@ -166,3 +166,40 @@ Source boundary         -> references/ plus public source spine
 最低要求：每次可复查计算都应有 input、output、record、赝势来源、运行命令和 output review。record 不要求所有文件都与它位于同一仓库，但必须让读者知道关键文件在哪里、哪些文件是长期证据、哪些只是 scratch。
 
 如果某个计算进入下游 workflow，例如从 SCF 进入 bands、DOS 或 phonon，下游 record 必须写清楚读取的是哪个上游计算的 `prefix/outdir`，以及上游状态是否达到 `PASS`。程序完成不等于结果可用；只有 record 中的证据支持下游，才应继续作为可靠输入。
+
+## 5. 目录布局对 PASS / WARN / BLOCK 的作用
+
+项目布局不直接证明物理正确，但它决定证据能否被复查：
+
+| 状态 | 项目布局条件 | 说明 |
+|---|---|---|
+| PASS | structures、pseudo-source、inputs、outputs、records 和 scripts 能通过 record 串成完整证据链 | 允许把该记录作为后续 workflow 的上游证据 |
+| WARN | 关键文件存在但分散，record 能说明位置、版本和限制 | 可继续整理或做探索性下游，不应写成最终结论 |
+| BLOCK | 结构来源、赝势来源、input/output、命令或 `prefix/outdir` 无法追踪 | 停止下游；先恢复 provenance 或重新计算 |
+
+如果大型 scratch 文件没有长期保存，record 应说明其保留位置、是否可再生成、以及哪些轻量 output 足以支撑当前结论。缺少 scratch 不自动进入 `BLOCK`；缺少能复查 input/output/source boundary 的记录才是 `BLOCK` 风险。
+
+## 6. 与 workflow 子目录布局的关系
+
+本页的顶层布局强调长期证据归档：`structures/`、`pseudo-source/`、`inputs/`、`outputs/`、`records/`、`scripts/`、`figures/` 和 `references/`。如果项目规模较小，可以直接使用这个顶层布局。
+
+[input-file-naming.md](input-file-naming.md) 中的 `calculations/<system>/01-scf/`、`02-convergence/`、`03-relax/` 等目录是 workflow 阶段视角，适合组织一组具体运行。推荐做法是二者嵌套或互相索引：
+
+```text
+<project>/
+  inputs/       -> 长期维护的 input 副本或入口
+  outputs/      -> 长期保留的轻量 output
+  records/      -> 最终审阅记录
+  calculations/
+    <system>/
+      01-scf/   -> 某轮 SCF 的运行目录或文件组织
+```
+
+不建议让同一计算的 input/output/record 分散在两个互不引用的结构中。若使用 workflow 子目录，record 中应写清长期归档位置和实际运行位置。
+
+## 资料来源
+
+- [calculation-record-template.md](calculation-record-template.md)：支持每次计算的 record 字段和 downstream gate；不替代具体 output。
+- [input-file-naming.md](input-file-naming.md)：支持 input/output/post-processing 文件命名；不替代 `prefix/outdir` 数据链核对。
+- [pass-warn-block.md](pass-warn-block.md)：支持项目布局问题如何降级为 `WARN` 或 `BLOCK`；不替代物理判断。
+- [references/source-index.md](../references/source-index.md)：支持公开来源和 source boundary 记录；不要求复制外部文档全文。

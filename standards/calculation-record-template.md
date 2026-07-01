@@ -108,7 +108,7 @@ pw.x -in pw.scf.<system>.in > pw.scf.<system>.out
 - Downstream allowed:
 - Downstream blocked:
 - Source boundary:
-- Uncertainty statement:
+- Uncertainty statement summary:
 
 ## Convergence status
 
@@ -135,6 +135,8 @@ pw.x -in pw.scf.<system>.in > pw.scf.<system>.out
 - Workflow propagation uncertainty:
 - Version-sensitive items:
 - Claim strength: Strong / Moderate / Boundary / Version-sensitive
+
+`Review status` 中的 `Uncertainty statement summary` 是一行结论摘要，用于说明当前 record 能否进入下游。下面的完整 `Uncertainty statement` section 保存详细分解；如果两者不一致，以详细分解为准，并将 `Review status` 降级为 `WARN` 直到修正。
 
 ## Problems encountered
 

@@ -11,6 +11,20 @@
 - Version-sensitive 字段必须查当前官方文档。旧页面、教程截图或历史笔记不能替代当前 `INPUT_*`。
 - 外部教程用于学习顺序和操作拆解，不用于给出参数定义或材料无关数值建议。
 
+## 来源如何进入 output review 和 PASS / WARN / BLOCK
+
+来源不是装饰性引用。每个来源应服务一个明确审阅动作：
+
+| 来源类别 | 在 output review 中支持什么 | 对 `PASS / WARN / BLOCK` 的作用 | 不能支持什么 |
+|---|---|---|---|
+| QE official `INPUT_*` / package docs | 核对字段、程序、文件依赖、输出文件语义和 version-sensitive 限制 | 字段或程序行为未核对时，相关判断最多为 `WARN`；字段明显不匹配可触发 `BLOCK` | 目标 observable 的物理充分性 |
+| QE output evidence | 核对本次 run 实际读取的结构、PP、k/q mesh、SCF/DFPT 收敛、warning、文件链 | 是 `PASS / WARN / BLOCK` 的直接证据来源 | 方法学普适结论 |
+| Canonical literature | 支撑 DFT/DFPT/PP/Wannier/EPC/excited-state/uncertainty 的方法边界 | 决定 claim strength 和是否需要 Boundary 说明 | 当前版本参数语法 |
+| Tool documentation | 核对 Wannier90、EPW、Yambo、SeeK-path、Phonopy 等工具接口和输出边界 | 工具链未核对时，高级下游通常只能 `WARN` 或 `BLOCK` | QE 原生 workflow 质量 |
+| Tutorial websites | 帮助学习 workflow 顺序、命令组织和常见输出阅读 | 可作为学习辅助，不应单独决定 `PASS` | 官方参数定义、材料无关数值建议 |
+
+当正文页面引用来源时，应写清“该来源支持什么判断、不支持什么结论”。如果无法说明用途，链接不应进入 source spine。
+
 ## QE official documentation
 
 | 来源 | 支持什么判断 | 主要对应页面 | 边界 |
