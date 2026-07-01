@@ -76,3 +76,24 @@ SCF convergence 也不等于所有 observable convergence。cutoff、k-point、s
 ```
 
 如果无法写清 `Evidence` 或 `Downstream allowed`，状态不能写成 `PASS`。
+
+## 8. 来源与版本边界
+
+`PASS / WARN / BLOCK` 的状态理由必须说明证据来源。不同来源支持的判断层级不同：
+
+| 来源类型 | 可支持的判断 | 不能替代什么 | 记录要求 |
+|---|---|---|---|
+| QE official `INPUT_*` / package docs | 字段含义、程序行为、文件链和 version-sensitive 语法 | 目标物理量是否收敛、模型是否适合体系 | 写明查了哪个官方入口或 package guide |
+| QE output / post-processing output | 当前 run 的实际输入回显、收敛状态、warning 和结果文件 | 文献级物理解释或跨模型结论 | 写明 output 文件、关键行或关键数值 |
+| canonical literature | DFT/DFPT/PP/Wannier/EPC/excited-state/reproducibility 的方法边界 | 当前 QE 版本字段定义 | 链接到 [canonical-literature.md](../references/canonical-literature.md) 或具体文献骨架 |
+| tutorial / tool docs | 学习路径、工具接口和 workflow 辅助理解 | 官方参数定义或最终物理可信度 | 写明只作为教程或工具边界 |
+| internal judgement | 本仓库的 `workflow`、`theory-minimum`、`physics-judgement` 和 `standards` 规则 | 外部公开来源 | 写明这是 Boundary / workflow gate，而不是外部定量结论 |
+
+Version-sensitive 字段和程序行为必须以当前官方文档为准。若状态判断依赖 `HUBBARD`、SOC、hybrid、vdW、PHonon、EPW、Wannier90、Yambo 或 post-processing 接口，record 中应写明版本边界；未核对版本时，最多进入 `WARN`。
+
+相关规范：
+
+- [output-review-checklist.md](output-review-checklist.md)
+- [calculation-record-template.md](calculation-record-template.md)
+- [citation-and-source-policy.md](citation-and-source-policy.md)
+- [references/source-index.md](../references/source-index.md)
